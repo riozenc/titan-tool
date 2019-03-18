@@ -26,7 +26,7 @@ public abstract class DefaultInterceptor extends HandlerInterceptorAdapter {
 
 		// 设置头信息,字符集UTF-8
 		httpServletResponse.setHeader("Content-type", "text/html;charset=UTF-8");
-		httpServletResponse.getWriter().println(exception);
+		httpServletResponse.getWriter().println();
 		httpServletResponse.getWriter().close();
 
 		logger.error("[" + DateUtil.getDateTime() + "]{" + httpServletRequest.getRemoteAddr() + "} 执行"

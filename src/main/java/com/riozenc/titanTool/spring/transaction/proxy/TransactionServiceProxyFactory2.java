@@ -90,7 +90,7 @@ public class TransactionServiceProxyFactory2 implements MethodInterceptor {
 			e.printStackTrace();
 			rollback();
 			logger.error(e);
-			return null;
+			throw e;
 		} finally {
 			// 最终处理
 			for (Entry<Integer, SqlSession> entry : getSqlSessionMap().entrySet()) {
