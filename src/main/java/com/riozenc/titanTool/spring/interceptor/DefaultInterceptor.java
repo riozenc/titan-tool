@@ -13,6 +13,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.riozenc.titanTool.common.date.DateUtil;
 import com.riozenc.titanTool.common.json.utils.JSONUtil;
+import com.riozenc.titanTool.spring.web.http.HttpResult;
 
 public abstract class DefaultInterceptor extends HandlerInterceptorAdapter {
 	private static final Log logger = LogFactory.getLog(DefaultInterceptor.class);
@@ -23,10 +24,16 @@ public abstract class DefaultInterceptor extends HandlerInterceptorAdapter {
 
 	private void executeException(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
 			Object object, Exception exception) throws Exception {
+		Throwable throwable = exception;
+
+		while (throwable.getCause() != null) {
+			throwable = throwable.getCause();
+		}
 
 		// 设置头信息,字符集UTF-8
 		httpServletResponse.setHeader("Content-type", "text/html;charset=UTF-8");
-		httpServletResponse.getWriter().println();
+		httpServletResponse.getWriter()
+				.println(JSONUtil.toJsonString(new HttpResult(HttpResult.ERROR, "执行异常:	" + throwable.getMessage())));
 		httpServletResponse.getWriter().close();
 
 		logger.error("[" + DateUtil.getDateTime() + "]{" + httpServletRequest.getRemoteAddr() + "} 执行"
