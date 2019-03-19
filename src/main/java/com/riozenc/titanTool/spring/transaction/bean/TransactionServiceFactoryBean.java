@@ -14,11 +14,13 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
 
 import com.riozenc.titanTool.annotation.TransactionDAO;
 import com.riozenc.titanTool.annotation.utils.AnnotationUtil;
 import com.riozenc.titanTool.common.reflect.ReflectUtil;
 import com.riozenc.titanTool.common.string.StringUtils;
+import com.riozenc.titanTool.spring.context.SpringContextHolder;
 import com.riozenc.titanTool.spring.transaction.proxy.TransactionServiceProxyFactory2;
 import com.riozenc.titanTool.spring.webapp.dao.AbstractTransactionDAOSupport;
 
@@ -26,6 +28,8 @@ public class TransactionServiceFactoryBean<T> implements FactoryBean<T> {
 
 	@Autowired
 	private AbstractAutowireCapableBeanFactory beanFacotry;
+	@Autowired
+	private ApplicationContext applicationContext;
 
 	private static Map<String, BeanDefinitionHolder> definitionHolderMap = new ConcurrentHashMap<>();
 	private Class<T> serviceInterface;
@@ -86,21 +90,22 @@ public class TransactionServiceFactoryBean<T> implements FactoryBean<T> {
 	private AbstractTransactionDAOSupport processTransactionDAO(Field dao) throws Exception {
 		if (null != dao.getAnnotation(TransactionDAO.class)) {
 
-			BeanDefinitionHolder beanDefinitionHolder = definitionHolderMap
-					.get(StringUtils.decapitalize(dao.getType().getSimpleName()));
-			if (beanDefinitionHolder == null) {
-				throw new Exception(dao.getType() + " is not found @TransactionDAO!");
-			}
-			AbstractTransactionDAOSupport abstractDAOSupport = (AbstractTransactionDAOSupport) BeanUtils
-					.instantiateClass(dao.getType());
+//			BeanDefinitionHolder beanDefinitionHolder = definitionHolderMap
+//					.get(StringUtils.decapitalize(dao.getType().getSimpleName()));
+//			if (beanDefinitionHolder == null) {
+//				throw new Exception(dao.getType() + " is not found @TransactionDAO!");
+//			}
+
+//			AbstractTransactionDAOSupport abstractDAOSupport = (AbstractTransactionDAOSupport) BeanUtils
+//					.instantiateClass(dao.getType());
+			AbstractTransactionDAOSupport abstractDAOSupport = (AbstractTransactionDAOSupport) applicationContext.getBean(dao.getType());
 
 			String dbName = (String) AnnotationUtil.getAnnotationValue(dao, TransactionDAO.class);
 			if (dbName.length() < 1) {
 				dbName = (String) AnnotationUtil.getAnnotationValue(dao.getType(), TransactionDAO.class);
 			}
 			ReflectUtil.setFieldValue(abstractDAOSupport, "dbName", dbName);
-			
-			
+
 			return abstractDAOSupport;
 		}
 		return null;
