@@ -16,42 +16,33 @@ import org.apache.ibatis.session.SqlSession;
 
 import com.riozenc.titanTool.mybatis.persistence.PersistanceManager;
 import com.riozenc.titanTool.mybatis.session.SqlSessionManager;
-import com.riozenc.titanTool.spring.webapp.dao.proxy.DAOProxyFactory;
 
 public abstract class AbstractDAOSupport {
 	private static final Log logger = LogFactory.getLog(AbstractDAOSupport.class);
 	private ExecutorType executorType = ExecutorType.SIMPLE;
 	private boolean isProxy = false;
-	private boolean autoCommit = false;
 	private String dbName = null;
 	private String NAMESPACE = null;
 
 	private ThreadLocal<Map<String, SqlSession>> localSqlSessionMap = new ThreadLocal<>();
 
 	public AbstractDAOSupport() {
-
 	}
 
 	protected PersistanceManager getPersistanceManager() {
-		return getPersistanceManager(this.executorType, this.autoCommit, this.isProxy);
-	}
-
-	protected PersistanceManager getPersistanceManager(boolean autoCommit) {
-
-		return getPersistanceManager(this.executorType, autoCommit, this.isProxy);
+		return getPersistanceManager(this.executorType, this.isProxy);
 	}
 
 	protected PersistanceManager getPersistanceManager(ExecutorType executorType) {
-		return getPersistanceManager(executorType, this.autoCommit, this.isProxy);
+		return getPersistanceManager(executorType, this.isProxy);
 	}
 
-	protected PersistanceManager getPersistanceManager(ExecutorType executorType, boolean autoCommit, boolean isProxy) {
+	protected PersistanceManager getPersistanceManager(ExecutorType executorType, boolean isProxy) {
 
-		return getPersistanceManager(this.dbName, executorType, autoCommit, isProxy);
+		return getPersistanceManager(this.dbName, executorType, isProxy);
 	}
 
-	protected PersistanceManager getPersistanceManager(String dbName, ExecutorType executorType, boolean autoCommit,
-			boolean isProxy) {
+	protected PersistanceManager getPersistanceManager(String dbName, ExecutorType executorType, boolean isProxy) {
 
 		Long l = System.currentTimeMillis();
 
@@ -76,12 +67,7 @@ public abstract class AbstractDAOSupport {
 				+ (System.currentTimeMillis() - l) / 1000);
 		getSqlSessionMap().put(dbName + executorType, sqlSession);
 
-		if (isProxy) {
-			return (PersistanceManager) DAOProxyFactory.getInstance()
-					.createProxy(new PersistanceManager(dbName,sqlSession, autoCommit));
-		} else {
-			return new PersistanceManager(dbName, sqlSession, autoCommit);
-		}
+		return new PersistanceManager(dbName, sqlSession);
 	}
 
 	public String getNamespace() {

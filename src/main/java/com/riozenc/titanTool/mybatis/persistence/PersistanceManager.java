@@ -43,11 +43,7 @@ public class PersistanceManager {
 		this.session = session;
 	}
 
-	public PersistanceManager(SqlSession session, boolean autoCommit) {
-		this.session = session;
-	}
-
-	public PersistanceManager(String dbName, SqlSession session, boolean autoCommit) {
+	public PersistanceManager(String dbName, SqlSession session) {
 		this.dbName = dbName;
 		this.session = session;
 	}
@@ -68,7 +64,6 @@ public class PersistanceManager {
 	 * @return
 	 */
 	public <T> T load(String namespace, Object obj) {
-
 		return session.selectOne(namespace, obj);
 	}
 

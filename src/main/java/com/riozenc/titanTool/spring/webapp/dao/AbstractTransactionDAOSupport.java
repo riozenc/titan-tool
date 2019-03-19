@@ -13,12 +13,8 @@ public abstract class AbstractTransactionDAOSupport extends AbstractDAOSupport {
 		return getPersistanceManager(false);
 	}
 
-	protected PersistanceManager getPersistanceManager(boolean autoCommit) {
-		return getPersistanceManager(autoCommit, false);
-	}
-
-	protected PersistanceManager getPersistanceManager(boolean autoCommit, boolean isProxy) {
-		return getPersistanceManager(getDbName(), getExecutorType(), autoCommit, isProxy);
+	protected PersistanceManager getPersistanceManager(boolean isProxy) {
+		return getPersistanceManager(getDbName(), getExecutorType(), isProxy);
 	}
 
 }
