@@ -11,7 +11,6 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ibatis.session.SqlSession;
@@ -23,7 +22,6 @@ import com.riozenc.titanTool.annotation.TransactionDAO;
 import com.riozenc.titanTool.common.date.DateUtil;
 import com.riozenc.titanTool.common.reflect.ReflectUtil;
 import com.riozenc.titanTool.spring.webapp.dao.AbstractDAOSupport;
-
 
 public class TransactionServiceProxyFactory2 implements MethodInterceptor {
 
@@ -120,8 +118,6 @@ public class TransactionServiceProxyFactory2 implements MethodInterceptor {
 		}
 	}
 
-	
-
 	private void close(SqlSession sqlSession) {
 		if (sqlSession != null) {
 			sqlSession.close();
@@ -148,6 +144,7 @@ public class TransactionServiceProxyFactory2 implements MethodInterceptor {
 			if (entry.getValue() != null) {
 				entry.getValue().rollback();// connection autocommit=true时 失效
 				// entry.getValue().getConnection().rollback();
+				logger.info(entry.getValue() + "rollback...");
 			}
 		}
 	}

@@ -14,6 +14,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface LogSupportAop {
+public @interface AfterAopSupport {
+	String method();// 方法
+
+	Class<?>[] parameterTypes();// 参数类型
 
 }
