@@ -90,15 +90,16 @@ public class TransactionServiceFactoryBean<T> implements FactoryBean<T> {
 	private AbstractTransactionDAOSupport processTransactionDAO(Field dao) throws Exception {
 		if (null != dao.getAnnotation(TransactionDAO.class)) {
 
-//			BeanDefinitionHolder beanDefinitionHolder = definitionHolderMap
-//					.get(StringUtils.decapitalize(dao.getType().getSimpleName()));
-//			if (beanDefinitionHolder == null) {
-//				throw new Exception(dao.getType() + " is not found @TransactionDAO!");
-//			}
+			BeanDefinitionHolder beanDefinitionHolder = definitionHolderMap
+					.get(StringUtils.decapitalize(dao.getType().getSimpleName()));
+			if (beanDefinitionHolder == null) {
+				throw new Exception(dao.getType() + " is not found @TransactionDAO!");
+			}
 
 //			AbstractTransactionDAOSupport abstractDAOSupport = (AbstractTransactionDAOSupport) BeanUtils
 //					.instantiateClass(dao.getType());
-			AbstractTransactionDAOSupport abstractDAOSupport = (AbstractTransactionDAOSupport) applicationContext.getBean(dao.getType());
+			AbstractTransactionDAOSupport abstractDAOSupport = (AbstractTransactionDAOSupport) applicationContext
+					.getBean(dao.getType());
 
 			String dbName = (String) AnnotationUtil.getAnnotationValue(dao, TransactionDAO.class);
 			if (dbName.length() < 1) {
