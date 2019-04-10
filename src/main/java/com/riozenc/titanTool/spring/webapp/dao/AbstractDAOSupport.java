@@ -21,7 +21,7 @@ public abstract class AbstractDAOSupport {
 	private static final Log logger = LogFactory.getLog(AbstractDAOSupport.class);
 	private ExecutorType executorType = ExecutorType.SIMPLE;
 	private boolean isProxy = false;
-	private String dbName;
+	private String dbName="master";
 	private String NAMESPACE = null;
 
 	private ThreadLocal<Map<String, SqlSession>> localSqlSessionMap = new ThreadLocal<>();
