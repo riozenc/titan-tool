@@ -11,7 +11,7 @@ public class Page {
 	@JsonIgnore
 	private int pageSize = Integer.valueOf(Global.getConfig("page.pageSize")); // 页面大小，设置为“-1”表示不进行分页（分页无效）
 	@JsonIgnore
-	private String dbName;
+	private String dbName="master";//默认master
 
 	public int getTotalRow() {
 		return totalRow;
