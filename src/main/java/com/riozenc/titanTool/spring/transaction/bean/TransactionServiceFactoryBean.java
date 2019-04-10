@@ -102,10 +102,12 @@ public class TransactionServiceFactoryBean<T> implements FactoryBean<T> {
 					.getBean(dao.getType());
 
 			String dbName = (String) AnnotationUtil.getAnnotationValue(dao, TransactionDAO.class);
-			if (dbName.length() < 1) {
+			if (dbName == null || dbName.isEmpty()) {
 				dbName = (String) AnnotationUtil.getAnnotationValue(dao.getType(), TransactionDAO.class);
 			}
-			ReflectUtil.setFieldValue(abstractDAOSupport, "dbName", dbName);
+			if (dbName != null && !dbName.isEmpty()) {
+				ReflectUtil.setFieldValue(abstractDAOSupport, "dbName", dbName);
+			}
 
 			return abstractDAOSupport;
 		}
