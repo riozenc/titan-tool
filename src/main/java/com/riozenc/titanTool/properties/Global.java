@@ -34,12 +34,21 @@ public class Global {
 	 * @see ${fns:getConfig('adminPath')}
 	 */
 	public static String getConfig(String key) {
+		return getConfig(key, null);
+	}
+	
+	/**
+	 * 获取配置
+	 * 
+	 * @see ${fns:getConfig('adminPath')}
+	 */
+	public static String getConfig(String key,String defaultValue) {
 		String value = map.get(key);
 		if (value == null) {
 			value = loader.getProperty(key);
 			map.put(key, value != null ? value : "");
 		}
-		return value;
+		return value==null?defaultValue:value;
 	}
 
 	/**
