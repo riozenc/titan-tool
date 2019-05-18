@@ -7,7 +7,9 @@ package com.riozenc.titanTool.spring.webapp.service;
 
 import java.util.List;
 
-public interface BaseService<T> {
+import com.riozenc.titanTool.mybatis.MybatisEntity;
+
+public interface BaseService<T extends MybatisEntity> {
 	public int insert(T t);
 
 	public int delete(T t);

@@ -7,7 +7,9 @@ package com.riozenc.titanTool.spring.webapp.dao;
 
 import java.util.List;
 
-public interface BaseDAO<T> {
+import com.riozenc.titanTool.mybatis.MybatisEntity;
+
+public interface BaseDAO<T extends MybatisEntity> {
 	public int insert(T t);
 
 	public int delete(T t);

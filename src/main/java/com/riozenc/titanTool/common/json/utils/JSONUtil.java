@@ -34,6 +34,10 @@ public class JSONUtil {
 		return toJsonString(object, null, false);
 	}
 
+	public static String toJsonString(Object object, boolean isIgnoreNull) {
+		return toJsonString(object, null, isIgnoreNull);
+	}
+
 	/**
 	 * 
 	 * @param object

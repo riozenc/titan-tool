@@ -5,6 +5,7 @@
  **/
 package com.riozenc.titanTool.common.date;
 
+import java.text.DateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,7 +41,15 @@ public class DateUtil {
 	 * @return
 	 */
 	public static String getDate() {
-		return LocalDate.now().format(DateTimeFormatter.ISO_DATE);
+		return getDate(DateTimeFormatter.ISO_DATE);
+	}
+
+	public static String getDate(DateTimeFormatter formatter) {
+		return LocalDate.now().format(formatter);
+	}
+
+	public static String getDate(String formatter) {
+		return LocalDate.now().format(DateTimeFormatter.ofPattern(formatter));
 	}
 
 	/**
@@ -54,6 +63,10 @@ public class DateUtil {
 		return getDate(local2Date(date), pattern);
 	}
 
+	public static String getDate(Date date, String pattern) {
+		return local2Date(date).format(DateTimeFormatter.ofPattern(pattern));
+	}
+
 	public static String getDate(Date date, long day, NdateFormatter pattern) {
 		return getDate(local2Date(date).plusDays(day), pattern);
 	}
@@ -62,7 +75,7 @@ public class DateUtil {
 		return Date.from(local2Date(date).plusDays(day).atZone(ZoneId.systemDefault()).toInstant());
 	}
 
-	public static Date getDate(String date) {
+	public static Date parseDate(String date) {
 		return Date.from(makeInstant(date));
 	}
 

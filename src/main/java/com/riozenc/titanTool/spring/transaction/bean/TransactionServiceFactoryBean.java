@@ -96,10 +96,10 @@ public class TransactionServiceFactoryBean<T> implements FactoryBean<T> {
 				throw new Exception(dao.getType() + " is not found @TransactionDAO!");
 			}
 
-//			AbstractTransactionDAOSupport abstractDAOSupport = (AbstractTransactionDAOSupport) BeanUtils
-//					.instantiateClass(dao.getType());
-			AbstractTransactionDAOSupport abstractDAOSupport = (AbstractTransactionDAOSupport) applicationContext
-					.getBean(dao.getType());
+			AbstractTransactionDAOSupport abstractDAOSupport = (AbstractTransactionDAOSupport) BeanUtils
+					.instantiateClass(dao.getType());
+//			AbstractTransactionDAOSupport abstractDAOSupport = (AbstractTransactionDAOSupport) applicationContext
+//					.getBean(dao.getType());//多数据源时冲突
 
 			String dbName = (String) AnnotationUtil.getAnnotationValue(dao, TransactionDAO.class);
 			if (dbName == null || dbName.isEmpty()) {
