@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -21,13 +23,20 @@ import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.WriteModel;
 import com.riozenc.titanTool.common.json.utils.JSONUtil;
+import com.riozenc.titanTool.common.string.StringUtils;
 import com.riozenc.titanTool.mongo.spring.MongoTemplateFactory;
+import com.riozenc.titanTool.mybatis.pagination.interceptor.PaginationInterceptor;
 import com.riozenc.titanTool.properties.Global;
 
 public interface MongoDAOSupport {
+	final Log logger = LogFactory.getLog(PaginationInterceptor.class);
 	static final String separatorChar = "#";
 
 	default MongoTemplate getMongoTemplate() {
+		if (StringUtils.isEmpty(Global.getConfig("mongo.databaseName"))) {
+			logger.info("mongo.databaseName is null");
+			return null;
+		}
 		return getMongoTemplate(Global.getConfig("mongo.databaseName"));
 	}
 
@@ -48,6 +57,10 @@ public interface MongoDAOSupport {
 		return documents;
 	}
 
+	default void insertMany(MongoCollection<Document> collection, List<Document> documents) {
+		collection.insertMany(documents);
+	}
+
 	default List<WriteModel<Document>> updateMany(List<Document> documents, MongoUpdateFilter mongoUpdateFilter,
 			boolean isUpsert) {
 		List<WriteModel<Document>> requests = new ArrayList<>();
@@ -63,7 +76,6 @@ public interface MongoDAOSupport {
 
 	default <T> List<T> findMany(MongoCollection<?> collection, MongoFindFilter filter, Class<T> clazz) {
 		FindIterable<T> findIterable = collection.find(filter.filter(), clazz);
-
 		MongoCursor<T> mongoCursor = findIterable.iterator();
 
 		List<T> result = new ArrayList<>();
@@ -72,8 +84,8 @@ public interface MongoDAOSupport {
 		}
 		return result;
 	}
-	
-	interface MongoFindFilter{
+
+	interface MongoFindFilter {
 		Bson filter();
 	}
 

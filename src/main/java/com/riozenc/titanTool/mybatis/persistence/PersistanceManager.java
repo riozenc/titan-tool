@@ -64,6 +64,9 @@ public class PersistanceManager {
 	 * @return
 	 */
 	public <T> T load(String namespace, Object obj) {
+		if (Page.class.isAssignableFrom(obj.getClass())) {
+			((Page) obj).setDbName(getDbName());
+		}
 		return session.selectOne(namespace, obj);
 	}
 
@@ -89,6 +92,9 @@ public class PersistanceManager {
 	 * @return
 	 */
 	public int insert(String namespace, Object obj) {
+		if (Page.class.isAssignableFrom(obj.getClass())) {
+			((Page) obj).setDbName(getDbName());
+		}
 		return session.insert(namespace, obj);
 	}
 
@@ -100,6 +106,9 @@ public class PersistanceManager {
 	 * @return
 	 */
 	public int update(String namespace, Object obj) {
+		if (Page.class.isAssignableFrom(obj.getClass())) {
+			((Page) obj).setDbName(getDbName());
+		}
 		return session.update(namespace, obj);
 	}
 
@@ -111,6 +120,9 @@ public class PersistanceManager {
 	 * @return
 	 */
 	public int delete(String namespace, Object obj) {
+		if (Page.class.isAssignableFrom(obj.getClass())) {
+			((Page) obj).setDbName(getDbName());
+		}
 		return session.delete(namespace, obj);
 	}
 

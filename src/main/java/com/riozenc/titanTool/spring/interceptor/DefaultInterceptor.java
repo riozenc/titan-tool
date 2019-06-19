@@ -33,7 +33,7 @@ public abstract class DefaultInterceptor extends HandlerInterceptorAdapter {
 		// 设置头信息,字符集UTF-8
 		httpServletResponse.setHeader("Content-type", "text/html;charset=UTF-8");
 		httpServletResponse.getWriter()
-				.println(JSONUtil.toJsonString(new HttpResult(HttpResult.ERROR, "执行异常:	" + throwable.getMessage())));
+				.println(JSONUtil.toJsonString(new HttpResult(HttpResult.ERROR, "执行异常:	"+ throwable + " " + throwable.getMessage())));
 		httpServletResponse.getWriter().close();
 
 		logger.error("[" + DateUtil.getDateTime() + "]{" + httpServletRequest.getRemoteAddr() + "} 执行"

@@ -32,6 +32,11 @@ public abstract class AbstractDAOSupport {
 	protected PersistanceManager getPersistanceManager() {
 		return getPersistanceManager(this.executorType, this.isProxy);
 	}
+	
+	protected PersistanceManager getPersistanceManager(boolean flag) {
+		return getPersistanceManager(this.executorType, this.isProxy);
+	}
+
 
 	protected PersistanceManager getPersistanceManager(ExecutorType executorType) {
 		return getPersistanceManager(executorType, this.isProxy);

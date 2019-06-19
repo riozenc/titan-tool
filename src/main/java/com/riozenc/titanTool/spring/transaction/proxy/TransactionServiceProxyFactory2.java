@@ -27,7 +27,7 @@ public class TransactionServiceProxyFactory2 implements MethodInterceptor {
 
 	private static final Log logger = LogFactory.getLog(TransactionServiceProxyFactory2.class);
 
-	private ThreadLocal<LinkedHashMap<Integer, SqlSession>> threadLocal = new ThreadLocal<>();
+	private ThreadLocal<LinkedHashMap<Integer, SqlSession>> threadLocal = new ThreadLocal<>();//待改：对数据进行判断和清理，根据时间戳
 
 	private Object targetObject;
 	private Class<?> clazz;
