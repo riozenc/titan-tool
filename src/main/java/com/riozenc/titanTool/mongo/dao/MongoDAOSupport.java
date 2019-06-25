@@ -19,6 +19,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.WriteModel;
@@ -57,8 +58,21 @@ public interface MongoDAOSupport {
 		return documents;
 	}
 
+	default MongoCollection<Document> getCollection(String date, String name) {
+		return getMongoTemplate().getCollection(getCollectionName(date, name));
+	}
+
 	default void insertMany(MongoCollection<Document> collection, List<Document> documents) {
 		collection.insertMany(documents);
+	}
+
+	default List<WriteModel<Document>> insertMany(List<Document> documents) {
+		List<WriteModel<Document>> requests = new ArrayList<>();
+		documents.stream().forEach(d -> {
+			InsertOneModel<Document> insertOneModel = new InsertOneModel<Document>(d);
+			requests.add(insertOneModel);
+		});
+		return requests;
 	}
 
 	default List<WriteModel<Document>> updateMany(List<Document> documents, MongoUpdateFilter mongoUpdateFilter,
@@ -69,6 +83,7 @@ public interface MongoDAOSupport {
 			Bson update = mongoUpdateFilter.update(d);
 			UpdateOneModel<Document> updateOneModel = new UpdateOneModel<>(filter, update,
 					new UpdateOptions().upsert(isUpsert));
+
 			requests.add(updateOneModel);
 		});
 		return requests;
