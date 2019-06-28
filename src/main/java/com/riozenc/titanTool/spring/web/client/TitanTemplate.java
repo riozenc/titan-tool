@@ -12,6 +12,7 @@ import java.util.concurrent.Callable;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -19,28 +20,42 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.riozenc.titanTool.common.json.utils.JSONUtil;
 
-public class TitanTemplate extends RestTemplate {
+public class TitanTemplate {
 
-	public <T> T post(String serverName, String url, HttpHeaders httpHeaders, Map<?, ?> params, Class<T> responseType)
-			throws JsonParseException, JsonMappingException, IOException {
+	public RestTemplate restTemplate;
 
-		String realUrl = "http://" + serverName + "/" + url;
-
-		HttpEntity<Map<?, ?>> httpEntity = new HttpEntity<>(params, httpHeaders);
-		String json = postForObject(realUrl, httpEntity, String.class);
-
-		return JSONUtil.readValue(json, responseType);
+	public TitanTemplate(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
 	}
-	
-	public <T> T post(String serverName, String url, HttpHeaders httpHeaders, Map<?, ?> params, TypeReference<T> typeReference)
-			throws JsonParseException, JsonMappingException, IOException {
+
+	public <T, V> T post(String serverName, String url, HttpHeaders httpHeaders, V params, Class<T> responseType)
+			throws Exception {
 
 		String realUrl = "http://" + serverName + "/" + url;
 
-		HttpEntity<Map<?, ?>> httpEntity = new HttpEntity<>(params, httpHeaders);
-		String json = postForObject(realUrl, httpEntity, String.class);
+		HttpEntity<V> httpEntity = new HttpEntity<>(params, httpHeaders);
 
+		return JSONUtil.readValue(http(serverName, realUrl, httpEntity), responseType);
+	}
+
+	public <T,V> T post(String serverName, String url, HttpHeaders httpHeaders, V params,
+			TypeReference<T> typeReference) throws Exception {
+		String realUrl = "http://" + serverName + "/" + url;
+
+		HttpEntity<V> httpEntity = new HttpEntity<>(params, httpHeaders);
+
+		String json = http(serverName, realUrl, httpEntity);
 		return JSONUtil.readValue(json, typeReference);
+	}
+
+	public <T> T postJson(String serverName, String url, HttpHeaders httpHeaders, Map<?, ?> params,
+			TypeReference<T> typeReference) throws Exception {
+		if (httpHeaders == null) {
+			httpHeaders = new HttpHeaders();
+		}
+		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+		return post(serverName, url, httpHeaders, params, typeReference);
 	}
 
 	public TitanCallback<Object> post1(String serverName, String url, HttpHeaders httpHeaders, Map<?, ?> params,
@@ -49,7 +64,7 @@ public class TitanTemplate extends RestTemplate {
 		String realUrl = "http://" + serverName + "/" + url;
 
 		HttpEntity<Map<?, ?>> httpEntity = new HttpEntity<>(params, httpHeaders);
-		String json = postForObject(realUrl, httpEntity, String.class);
+		String json = restTemplate.postForObject(realUrl, httpEntity, String.class);
 
 		return new TitanCallback<Object>() {
 
@@ -69,11 +84,15 @@ public class TitanTemplate extends RestTemplate {
 		};
 	}
 
-	// restTemplate.getForObject("http://AUTH-CENTER/auth/extractToken?token=" +
-	// token, String.class);
-
-	// restTemplate.exchange("http://AUTH-DATA/auth-data/role/auth/table",HttpMethod.GET,
-	// requestEntity, String.class);
+	private String http(String serverName, String realUrl, HttpEntity<?> httpEntity) throws Exception {
+		try {
+			String json = restTemplate.postForObject(realUrl, httpEntity, String.class);
+			return json;
+		} catch (Exception e) {
+			// TODO: handle exception
+			throw new Exception(serverName + "服务执行失败，case:" + e);
+		}
+	}
 
 	public interface TitanCallback<V> extends Callable<V> {
 
