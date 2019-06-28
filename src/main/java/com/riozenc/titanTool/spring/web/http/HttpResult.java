@@ -12,6 +12,7 @@ public class HttpResult {
 	private Integer statusCode;
 	private Object message;
 
+	public HttpResult() {}
 	public HttpResult(Integer statusCode, Object message) {
 		this.statusCode = statusCode;
 		this.message = message;
