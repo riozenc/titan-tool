@@ -6,6 +6,7 @@
 **/
 package com.riozenc.titanTool.mongo.dao;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -89,13 +90,28 @@ public interface MongoDAOSupport {
 		return requests;
 	}
 
-	default <T> List<T> findMany(MongoCollection<?> collection, MongoFindFilter filter, Class<T> clazz) {
-		FindIterable<T> findIterable = collection.find(filter.filter(), clazz);
-		MongoCursor<T> mongoCursor = findIterable.iterator();
-
-		List<T> result = new ArrayList<>();
+	default List<String> findMany(MongoCollection<?> collection, MongoFindFilter filter) {
+		FindIterable<String> findIterable = collection.find(filter.filter(), String.class);
+		MongoCursor<String> mongoCursor = findIterable.iterator();
+		List<String> result = new ArrayList<>();
 		while (mongoCursor.hasNext()) {
 			result.add(mongoCursor.next());
+		}
+		return result;
+	}
+
+	default <T> List<T> findMany(MongoCollection<Document> collection, MongoFindFilter filter, Class<T> clazz) {
+		FindIterable<Document> findIterable = collection.find(filter.filter());
+		MongoCursor<Document> mongoCursor = findIterable.iterator();
+		List<T> result = new ArrayList<>();
+		while (mongoCursor.hasNext()) {
+			Document document = mongoCursor.next();
+			try {
+				result.add(JSONUtil.readValue(document.toJson(), clazz));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return result;
 	}
