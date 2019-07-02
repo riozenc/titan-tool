@@ -15,6 +15,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bson.json.JsonMode;
+import org.bson.json.JsonWriterSettings;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 import com.mongodb.client.FindIterable;
@@ -107,7 +109,8 @@ public interface MongoDAOSupport {
 		while (mongoCursor.hasNext()) {
 			Document document = mongoCursor.next();
 			try {
-				result.add(JSONUtil.readValue(document.toJson(), clazz));
+				result.add(JSONUtil.readValue(
+						document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
