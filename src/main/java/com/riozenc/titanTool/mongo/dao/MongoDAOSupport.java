@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,6 +58,14 @@ public interface MongoDAOSupport {
 		List<Document> documents = Collections.synchronizedList(new ArrayList<>());
 		list.parallelStream().forEach(m -> {
 			documents.add(Document.parse(JSONUtil.toJsonString(m)));
+		});
+		return documents;
+	}
+
+	default <T> List<Document> toDocuments(List<T> list, ToDocumentCallBack<T> callBack) {
+		List<Document> documents = Collections.synchronizedList(new ArrayList<>());
+		list.parallelStream().forEach(m -> {
+			documents.add(Document.parse(JSONUtil.toJsonString(callBack.call(m))));
 		});
 		return documents;
 	}
@@ -135,4 +144,7 @@ public interface MongoDAOSupport {
 		Document filter();
 	}
 
+	interface ToDocumentCallBack<T> {
+		T call(T t);
+	}
 }
