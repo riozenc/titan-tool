@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,6 +57,7 @@ public interface MongoDAOSupport {
 		List<Document> documents = Collections.synchronizedList(new ArrayList<>());
 		list.parallelStream().forEach(m -> {
 			documents.add(Document.parse(JSONUtil.toJsonString(m)));
+//			documents.add(Document.parse(GsonUtils.toJsonIgnoreNull(m)));
 		});
 		return documents;
 	}
@@ -112,12 +112,14 @@ public interface MongoDAOSupport {
 	}
 
 	default <T> List<T> findMany(MongoCollection<Document> collection, MongoFindFilter filter, Class<T> clazz) {
+
 		FindIterable<Document> findIterable = collection.find(filter.filter());
 		MongoCursor<Document> mongoCursor = findIterable.iterator();
 		List<T> result = new ArrayList<>();
 		while (mongoCursor.hasNext()) {
 			Document document = mongoCursor.next();
 			try {
+
 				result.add(JSONUtil.readValue(
 						document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
 			} catch (IOException e) {
@@ -125,6 +127,8 @@ public interface MongoDAOSupport {
 				e.printStackTrace();
 			}
 		}
+
+		logger.info(filter.filter().toString() + "====" + result.size());
 		return result;
 	}
 

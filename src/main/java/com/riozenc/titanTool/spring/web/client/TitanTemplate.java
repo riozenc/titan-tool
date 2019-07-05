@@ -58,25 +58,25 @@ public class TitanTemplate {
 		return post(serverName, url, httpHeaders, params, typeReference);
 	}
 
-	public TitanCallback<Object> post1(String serverName, String url, HttpHeaders httpHeaders, Map<?, ?> params,
-			Class<?> responseType) throws JsonParseException, JsonMappingException, IOException {
+	public <T>TitanCallback<T> postCallBack(String serverName, String url, HttpHeaders httpHeaders, Map<?, ?> params,
+			Class<T> responseType) throws JsonParseException, JsonMappingException, IOException {
 
 		String realUrl = "http://" + serverName + "/" + url;
 
 		HttpEntity<Map<?, ?>> httpEntity = new HttpEntity<>(params, httpHeaders);
 		String json = restTemplate.postForObject(realUrl, httpEntity, String.class);
 
-		return new TitanCallback<Object>() {
+		return new TitanCallback<T>() {
 
 			@Override
-			public Object call() throws Exception {
+			public T call() throws Exception {
 				// TODO Auto-generated method stub
 
 				return JSONUtil.readValue(json, responseType);
 			}
 
 			@Override
-			public Object getBody() {
+			public String getBody() {
 				// TODO Auto-generated method stub
 				return json;
 			}
