@@ -29,4 +29,8 @@ public class GsonUtils {
 	public static String toJsonIgnoreNull(Object object) {
 		return IGNORE_NULL_GOSN.toJson(object);
 	}
+
+	public static <T> T readValue(String json, Class<T> clazz) {
+		return GSON.fromJson(json, clazz);
+	}
 }

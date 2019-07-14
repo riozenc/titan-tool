@@ -38,7 +38,7 @@ public class TitanTemplate {
 		return JSONUtil.readValue(http(serverName, realUrl, httpEntity), responseType);
 	}
 
-	public <T,V> T post(String serverName, String url, HttpHeaders httpHeaders, V params,
+	public <T, V> T post(String serverName, String url, HttpHeaders httpHeaders, V params,
 			TypeReference<T> typeReference) throws Exception {
 		String realUrl = "http://" + serverName + "/" + url;
 
@@ -46,6 +46,16 @@ public class TitanTemplate {
 
 		String json = http(serverName, realUrl, httpEntity);
 		return JSONUtil.readValue(json, typeReference);
+	}
+
+	public <T> T postJson(String serverName, String url, HttpHeaders httpHeaders, Map<?, ?> params, Class<T> clazz)
+			throws Exception {
+		if (httpHeaders == null) {
+			httpHeaders = new HttpHeaders();
+		}
+		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+		return post(serverName, url, httpHeaders, params, clazz);
 	}
 
 	public <T> T postJson(String serverName, String url, HttpHeaders httpHeaders, Map<?, ?> params,
@@ -58,7 +68,7 @@ public class TitanTemplate {
 		return post(serverName, url, httpHeaders, params, typeReference);
 	}
 
-	public <T>TitanCallback<T> postCallBack(String serverName, String url, HttpHeaders httpHeaders, Map<?, ?> params,
+	public <T> TitanCallback<T> postCallBack(String serverName, String url, HttpHeaders httpHeaders, Map<?, ?> params,
 			Class<T> responseType) throws JsonParseException, JsonMappingException, IOException {
 
 		String realUrl = "http://" + serverName + "/" + url;

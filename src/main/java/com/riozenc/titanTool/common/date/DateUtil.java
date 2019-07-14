@@ -5,7 +5,6 @@
  **/
 package com.riozenc.titanTool.common.date;
 
-import java.text.DateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -71,7 +70,11 @@ public class DateUtil {
 		return getDate(local2Date(date).plusDays(day), pattern);
 	}
 
-	public static Date Date(Date date, long day) {
+	public static Date getDateFromUTC() {
+		return Date.from(local2Date(new Date()).plusHours(8).atZone(ZoneId.systemDefault()).toInstant());
+	}
+
+	public static Date getDatePlusDays(Date date, long day) {
 		return Date.from(local2Date(date).plusDays(day).atZone(ZoneId.systemDefault()).toInstant());
 	}
 

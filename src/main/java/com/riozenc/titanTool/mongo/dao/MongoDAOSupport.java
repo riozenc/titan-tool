@@ -26,6 +26,7 @@ import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.WriteModel;
+import com.riozenc.titanTool.common.json.utils.GsonUtils;
 import com.riozenc.titanTool.common.json.utils.JSONUtil;
 import com.riozenc.titanTool.common.string.StringUtils;
 import com.riozenc.titanTool.mongo.spring.MongoTemplateFactory;
@@ -33,7 +34,7 @@ import com.riozenc.titanTool.mybatis.pagination.interceptor.PaginationIntercepto
 import com.riozenc.titanTool.properties.Global;
 
 public interface MongoDAOSupport {
-	final Log logger = LogFactory.getLog(PaginationInterceptor.class);
+	final Log logger = LogFactory.getLog(MongoDAOSupport.class);
 	static final String separatorChar = "#";
 
 	default MongoTemplate getMongoTemplate() {
@@ -118,17 +119,20 @@ public interface MongoDAOSupport {
 		List<T> result = new ArrayList<>();
 		while (mongoCursor.hasNext()) {
 			Document document = mongoCursor.next();
-			try {
-
-				result.add(JSONUtil.readValue(
-						document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
+			result.add(GsonUtils.readValue(
+					document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
+//			try {
+//				result.add(JSONUtil.readValue(
+//						document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 		}
 
-		logger.info(filter.filter().toString() + "====" + result.size());
+		logger.info(
+				collection.getNamespace().getFullName() + "::" + filter.filter().toString() + "====" + result.size());
 		return result;
 	}
 
