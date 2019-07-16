@@ -78,7 +78,7 @@ public class PersistanceManager {
 	 * @return
 	 */
 	public <T> List<T> find(String namespace, Object obj) {
-		if (Page.class.isAssignableFrom(obj.getClass())) {
+		if (obj != null && Page.class.isAssignableFrom(obj.getClass())) {
 			((Page) obj).setDbName(getDbName());
 		}
 		return session.selectList(namespace, obj);
