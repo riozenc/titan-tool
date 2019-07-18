@@ -64,7 +64,7 @@ public class PersistanceManager {
 	 * @return
 	 */
 	public <T> T load(String namespace, Object obj) {
-		if (Page.class.isAssignableFrom(obj.getClass())) {
+		if (obj != null && Page.class.isAssignableFrom(obj.getClass())) {
 			((Page) obj).setDbName(getDbName());
 		}
 		return session.selectOne(namespace, obj);
