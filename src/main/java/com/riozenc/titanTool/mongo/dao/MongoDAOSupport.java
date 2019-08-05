@@ -6,7 +6,6 @@
 **/
 package com.riozenc.titanTool.mongo.dao;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +29,6 @@ import com.riozenc.titanTool.common.json.utils.GsonUtils;
 import com.riozenc.titanTool.common.json.utils.JSONUtil;
 import com.riozenc.titanTool.common.string.StringUtils;
 import com.riozenc.titanTool.mongo.spring.MongoTemplateFactory;
-import com.riozenc.titanTool.mybatis.pagination.interceptor.PaginationInterceptor;
 import com.riozenc.titanTool.properties.Global;
 
 public interface MongoDAOSupport {
@@ -112,6 +110,11 @@ public interface MongoDAOSupport {
 		return result;
 	}
 
+	// TODO 后期扩展：多库，多次查询后汇总结果
+	default <T> List<T> findMany(String collectionName, MongoFindFilter filter, Class<T> clazz) {
+		return findMany(getMongoTemplate().getCollection(collectionName), filter, clazz);
+	}
+
 	default <T> List<T> findMany(MongoCollection<Document> collection, MongoFindFilter filter, Class<T> clazz) {
 
 		FindIterable<Document> findIterable = collection.find(filter.filter());
@@ -119,16 +122,8 @@ public interface MongoDAOSupport {
 		List<T> result = new ArrayList<>();
 		while (mongoCursor.hasNext()) {
 			Document document = mongoCursor.next();
-			
 			result.add(GsonUtils.readValue(
 					document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
-//			try {
-//				result.add(JSONUtil.readValue(
-//						document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
 		}
 
 		logger.info(
