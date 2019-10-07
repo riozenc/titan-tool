@@ -116,7 +116,7 @@ public class StringUtils {
 		char[] temp = input.toCharArray();
 		int length = temp.length;
 		for (int i = 0; i < length; i++) {
-			if (Character.isUpperCase(temp[i])) {
+			if (Character.isUpperCase(temp[i]) || Character.isDigit(temp[i])) {
 				result.append("_").append(temp[i]);
 			} else {
 				result.append(Character.toUpperCase(temp[i]));
