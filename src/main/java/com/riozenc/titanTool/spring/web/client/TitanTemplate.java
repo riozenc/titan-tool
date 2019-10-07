@@ -7,6 +7,9 @@
 package com.riozenc.titanTool.spring.web.client;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -18,6 +21,8 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.google.gson.reflect.TypeToken;
+import com.riozenc.titanTool.common.json.utils.GsonUtils;
 import com.riozenc.titanTool.common.json.utils.JSONUtil;
 
 public class TitanTemplate {
@@ -68,6 +73,21 @@ public class TitanTemplate {
 		return post(serverName, url, httpHeaders, params, typeReference);
 	}
 
+	public <T> List<T> postJsonToList(String serverName, String url, HttpHeaders httpHeaders, Map<?, ?> params,
+			Class<T> clazz) throws Exception {
+		if (httpHeaders == null) {
+			httpHeaders = new HttpHeaders();
+		}
+		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+		String realUrl = "http://" + serverName + "/" + url;
+
+		HttpEntity<?> httpEntity = new HttpEntity<>(params, httpHeaders);
+		Type typeOfT = new TypeToken<Collection<T>>() {
+		}.getType();
+		return GsonUtils.readValueToList(http(serverName, realUrl, httpEntity), typeOfT);
+	}
+
 	public <T> TitanCallback<T> postCallBack(String serverName, String url, HttpHeaders httpHeaders, Map<?, ?> params,
 			Class<T> responseType) throws JsonParseException, JsonMappingException, IOException {
 
@@ -100,7 +120,7 @@ public class TitanTemplate {
 			return json;
 		} catch (Exception e) {
 			// TODO: handle exception
-			throw new Exception(serverName + "服务执行失败，case:" + e);
+			throw new Exception(serverName + "|" + realUrl + "服务执行失败，case:" + e);
 		}
 	}
 

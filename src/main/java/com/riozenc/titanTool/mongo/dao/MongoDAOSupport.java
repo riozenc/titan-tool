@@ -8,6 +8,7 @@ package com.riozenc.titanTool.mongo.dao;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -18,6 +19,7 @@ import org.bson.json.JsonMode;
 import org.bson.json.JsonWriterSettings;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -55,8 +57,8 @@ public interface MongoDAOSupport {
 	default List<Document> toDocuments(List<?> list) {
 		List<Document> documents = Collections.synchronizedList(new ArrayList<>());
 		list.parallelStream().forEach(m -> {
-			documents.add(Document.parse(JSONUtil.toJsonString(m)));
-//			documents.add(Document.parse(GsonUtils.toJsonIgnoreNull(m)));
+//			documents.add(Document.parse(JSONUtil.toJsonString(m)));
+			documents.add(Document.parse(GsonUtils.toJsonIgnoreNull(m)));
 		});
 		return documents;
 	}
@@ -64,7 +66,8 @@ public interface MongoDAOSupport {
 	default <T> List<Document> toDocuments(List<T> list, ToDocumentCallBack<T> callBack) {
 		List<Document> documents = Collections.synchronizedList(new ArrayList<>());
 		list.parallelStream().forEach(m -> {
-			documents.add(Document.parse(JSONUtil.toJsonString(callBack.call(m))));
+//			documents.add(Document.parse(JSONUtil.toJsonString(callBack.call(m))));
+			documents.add(Document.parse(GsonUtils.toJsonIgnoreNull(callBack.call(m))));
 		});
 		return documents;
 	}
@@ -115,8 +118,22 @@ public interface MongoDAOSupport {
 		return findMany(getMongoTemplate().getCollection(collectionName), filter, clazz);
 	}
 
-	default <T> List<T> findMany(MongoCollection<Document> collection, MongoFindFilter filter, Class<T> clazz) {
+	default <T> List<T> findManySort(String collectionName, MongoFindFilter filter, Class<T> clazz) {
+		MongoCollection<Document> collection = getMongoTemplate().getCollection(collectionName);
+		FindIterable<Document> findIterable = collection.find(filter.filter()).sort(filter.getSort());
+		MongoCursor<Document> mongoCursor = findIterable.iterator();
+		List<T> result = new ArrayList<>();
+		while (mongoCursor.hasNext()) {
+			Document document = mongoCursor.next();
+			result.add(GsonUtils.readValue(
+					document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
+		}
+		logger.info(
+				collection.getNamespace().getFullName() + "::" + filter.filter().toString() + "====" + result.size());
+		return result;
+	}
 
+	default <T> List<T> findMany(MongoCollection<Document> collection, MongoFindFilter filter, Class<T> clazz) {
 		FindIterable<Document> findIterable = collection.find(filter.filter());
 		MongoCursor<Document> mongoCursor = findIterable.iterator();
 		List<T> result = new ArrayList<>();
@@ -131,8 +148,51 @@ public interface MongoDAOSupport {
 		return result;
 	}
 
+	default List<Document> aggregate(String collectionName, MongoAggregateFilter filter) {
+		MongoCollection<Document> collection = getMongoTemplate().getCollection(collectionName);
+
+		List<? extends Bson> pipeline = filter.getPipeline();
+
+		AggregateIterable<Document> aggregateIterable = collection.aggregate(pipeline);
+
+		MongoCursor<Document> mongoCursor = aggregateIterable.iterator();
+
+		List<Document> result = new ArrayList<>();
+		while (mongoCursor.hasNext()) {
+			Document document = mongoCursor.next();
+			result.add(document);
+		}
+
+		logger.info(collection.getNamespace().getFullName() + "::" + filter.getMatch().toString() + "+"
+				+ filter.getGroup() + "====" + result.size());
+
+		return result;
+	}
+
 	interface MongoFindFilter {
 		Bson filter();
+
+		default Bson getSort() {
+			return new Document("id", 1);
+		}
+
+		/**
+		 * 升序
+		 * 
+		 * @return
+		 */
+		default int up() {
+			return 1;
+		}
+
+		/**
+		 * 降序
+		 * 
+		 * @return
+		 */
+		default int down() {
+			return -1;
+		}
 	}
 
 	interface MongoUpdateFilter {
@@ -141,10 +201,33 @@ public interface MongoDAOSupport {
 		default Bson update(Document param) {
 			return new Document("$set", param);
 		}
+
 	}
 
 	interface MongoDeleteFilter {
 		Document filter();
+	}
+
+	interface MongoAggregateFilter {
+		default List<? extends Bson> getPipeline() {
+			List<Bson> pipeLine = new LinkedList<>();
+			pipeLine.add(getMatch());
+			pipeLine.add(getGroup());
+			return pipeLine;
+		};
+
+		Bson setGroup();
+
+		Bson setMatch();
+
+		default Bson getGroup() {
+			return new Document("$group", setGroup());
+		};
+
+		default Bson getMatch() {
+			return new Document("$match", setMatch());
+		}
+
 	}
 
 	interface ToDocumentCallBack<T> {
