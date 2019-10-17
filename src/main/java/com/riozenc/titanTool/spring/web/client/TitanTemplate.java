@@ -21,6 +21,8 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.riozenc.titanTool.common.json.utils.GsonUtils;
 import com.riozenc.titanTool.common.json.utils.JSONUtil;
@@ -85,7 +87,11 @@ public class TitanTemplate {
 		HttpEntity<?> httpEntity = new HttpEntity<>(params, httpHeaders);
 		Type typeOfT = new TypeToken<Collection<T>>() {
 		}.getType();
-		return GsonUtils.readValueToList(http(serverName, realUrl, httpEntity), typeOfT);
+		try {
+			return GsonUtils.readValueToList(http(serverName, realUrl, httpEntity), typeOfT);
+		} catch (JsonSyntaxException e) {
+			return GsonUtils.readValueToList(parseJson(http(serverName, realUrl, httpEntity)), typeOfT);
+		}
 	}
 
 	public <T> TitanCallback<T> postCallBack(String serverName, String url, HttpHeaders httpHeaders, Map<?, ?> params,
@@ -122,6 +128,35 @@ public class TitanTemplate {
 			// TODO: handle exception
 			throw new Exception(serverName + "|" + realUrl + "服务执行失败，case:" + e);
 		}
+	}
+
+	private String parseJson(String json) {
+		JsonElement jsonElement = GsonUtils.readValue(json, JsonElement.class);
+		if (jsonElement.isJsonObject()) {
+			if (jsonElement.getAsJsonObject().get("statusCode").getAsInt() == 200
+					&& jsonElement.getAsJsonObject().get("message") != null) {
+				return jsonElement.getAsJsonObject().get("message").toString();
+			}
+		}
+		return json;
+	}
+
+	public static void main(String[] args) {
+//		String json = "{\"statusCode\":200,\"message\":[{\"id\":3,\"priceExecutionId\":4,\"priceName\":\"0.4KV居民生活用电\",\"ladderSn\":1,\"ladderValue\":170,\"price\":0.4834750,\"createDate\":\"2019-10-15T01:21:54.000+0000\",\"status\":0},{\"id\":4,\"priceExecutionId\":4,\"priceName\":\"0.4KV居民生活用电\",\"ladderSn\":2,\"ladderValue\":260,\"price\":0.5334750,\"createDate\":\"2019-10-15T01:05:45.000+0000\",\"status\":1},{\"id\":5,\"priceExecutionId\":4,\"priceName\":\"0.4KV居民生活用电\",\"ladderSn\":3,\"ladderValue\":-1,\"price\":0.7834750,\"createDate\":\"2019-10-15T01:06:37.000+0000\",\"status\":1}]}";
+		String json = "{\"statusCode\":200,\"message\":[{\"id\":3,\"priceExecutionId\":4,\"priceName\":\"0.4KV居民生活用电\",\"ladderSn\":1,\"ladderValue\":170,\"price\":0.4834750,\"createDate\":\"2019-10-15T01:21:54.000+0000\",\"status\":0},{\"id\":4,\"priceExecutionId\":4,\"priceName\":\"0.4KV居民生活用电\",\"ladderSn\":2,\"ladderValue\":260,\"price\":0.5334750,\"createDate\":\"2019-10-15T01:05:45.000+0000\",\"status\":1},{\"id\":5,\"priceExecutionId\":4,\"priceName\":\"0.4KV居民生活用电\",\"ladderSn\":3,\"ladderValue\":-1,\"price\":0.7834750,\"createDate\":\"2019-10-15T01:06:37.000+0000\",\"status\":1}]}";
+
+		JsonElement jsonElement = GsonUtils.readValue(json, JsonElement.class);
+
+		if (jsonElement.isJsonObject()) {
+			if (jsonElement.getAsJsonObject().get("statusCode").getAsInt() == 200
+					&& jsonElement.getAsJsonObject().get("message") != null) {
+				System.out.println(jsonElement.getAsJsonObject().get("message").toString());
+				return;
+			}
+		}
+
+		System.out.println(json);
+
 	}
 
 	public interface TitanCallback<V> extends Callable<V> {

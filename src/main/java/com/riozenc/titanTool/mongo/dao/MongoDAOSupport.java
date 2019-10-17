@@ -31,6 +31,7 @@ import com.riozenc.titanTool.common.json.utils.GsonUtils;
 import com.riozenc.titanTool.common.json.utils.JSONUtil;
 import com.riozenc.titanTool.common.string.StringUtils;
 import com.riozenc.titanTool.mongo.spring.MongoTemplateFactory;
+import com.riozenc.titanTool.mybatis.pagination.Page;
 import com.riozenc.titanTool.properties.Global;
 
 public interface MongoDAOSupport {
@@ -133,6 +134,30 @@ public interface MongoDAOSupport {
 		return result;
 	}
 
+	default <T> List<T> findManyByPage(String collectionName, MongoFindFilter filter, Class<T> clazz) {
+		MongoCollection<Document> collection = getMongoTemplate().getCollection(collectionName);
+		FindIterable<Document> findIterable = null;
+		if (filter.getPage() != null) {
+			findIterable = collection.find(filter.filter()).sort(filter.getSort())
+					.skip(Math.multiplyExact(filter.getPage().getPageSize(), filter.getPage().getPageCurrent() - 1))
+					.limit(filter.getPage().getPageSize());
+		} else {
+			findIterable = collection.find(filter.filter()).sort(filter.getSort());
+		}
+		long count = collection.countDocuments(filter.filter());
+		filter.getPage().setTotalRow((int) count);
+		MongoCursor<Document> mongoCursor = findIterable.iterator();
+		List<T> result = new ArrayList<>();
+		while (mongoCursor.hasNext()) {
+			Document document = mongoCursor.next();
+			result.add(GsonUtils.readValue(
+					document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
+		}
+		logger.info(
+				collection.getNamespace().getFullName() + "::" + filter.filter().toString() + "====" + result.size());
+		return result;
+	}
+
 	default <T> List<T> findMany(MongoCollection<Document> collection, MongoFindFilter filter, Class<T> clazz) {
 		FindIterable<Document> findIterable = collection.find(filter.filter());
 		MongoCursor<Document> mongoCursor = findIterable.iterator();
@@ -174,6 +199,10 @@ public interface MongoDAOSupport {
 
 		default Bson getSort() {
 			return new Document("id", 1);
+		}
+
+		default Page getPage() {
+			return null;
 		}
 
 		/**

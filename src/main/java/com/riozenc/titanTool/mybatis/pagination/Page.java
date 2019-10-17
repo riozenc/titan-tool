@@ -3,17 +3,22 @@ package com.riozenc.titanTool.mybatis.pagination;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
+import com.riozenc.titanTool.common.json.annotation.IgnorRead;
 import com.riozenc.titanTool.properties.Global;
 
 public class Page {
 
 	@JsonProperty(access = Access.WRITE_ONLY)
+	@IgnorRead
 	private int totalRow;// 总条数
 	@JsonProperty(access = Access.WRITE_ONLY)
+	@IgnorRead
 	private int pageCurrent = 1; // 当前页
 	@JsonProperty(access = Access.WRITE_ONLY)
+	@IgnorRead
 	private int pageSize = Integer.valueOf(Global.getConfig("page.pageSize")); // 页面大小，设置为“-1”表示不进行分页（分页无效）
 	@JsonProperty(access = Access.WRITE_ONLY)
+	@IgnorRead
 	private String dbName;
 
 	public int getTotalRow() {
