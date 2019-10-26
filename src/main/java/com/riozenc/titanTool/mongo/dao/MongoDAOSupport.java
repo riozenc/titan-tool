@@ -23,10 +23,12 @@ import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.DeleteOneModel;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.WriteModel;
+import com.mongodb.client.result.DeleteResult;
 import com.riozenc.titanTool.common.json.utils.GsonUtils;
 import com.riozenc.titanTool.common.json.utils.JSONUtil;
 import com.riozenc.titanTool.common.string.StringUtils;
@@ -173,6 +175,16 @@ public interface MongoDAOSupport {
 		return result;
 	}
 
+	default long deleteMany(String collectionName, MongoDeleteFilter filter) {
+
+		MongoCollection<Document> collection = getMongoTemplate().getCollection(collectionName);
+
+		DeleteResult deleteResult = collection.deleteMany(filter.filter());
+		logger.info(collection.getNamespace().getFullName() + "::" + filter.filter().toString() + "===="
+				+ deleteResult.getDeletedCount());
+		return deleteResult.getDeletedCount();
+	}
+
 	default List<Document> aggregate(String collectionName, MongoAggregateFilter filter) {
 		MongoCollection<Document> collection = getMongoTemplate().getCollection(collectionName);
 
@@ -234,7 +246,7 @@ public interface MongoDAOSupport {
 	}
 
 	interface MongoDeleteFilter {
-		Document filter();
+		Bson filter();
 	}
 
 	interface MongoAggregateFilter {

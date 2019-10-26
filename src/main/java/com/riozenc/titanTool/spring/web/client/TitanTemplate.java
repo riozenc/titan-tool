@@ -8,7 +8,6 @@ package com.riozenc.titanTool.spring.web.client;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -85,8 +84,8 @@ public class TitanTemplate {
 		String realUrl = "http://" + serverName + "/" + url;
 
 		HttpEntity<?> httpEntity = new HttpEntity<>(params, httpHeaders);
-		Type typeOfT = new TypeToken<Collection<T>>() {
-		}.getType();
+		Type typeOfT = TypeToken.getParameterized(List.class, clazz).getType();
+
 		try {
 			return GsonUtils.readValueToList(http(serverName, realUrl, httpEntity), typeOfT);
 		} catch (JsonSyntaxException e) {
