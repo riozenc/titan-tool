@@ -7,11 +7,13 @@
 package com.riozenc.titanTool.common.json.utils;
 
 import java.lang.reflect.Type;
+import java.util.List;
 
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.riozenc.titanTool.common.json.annotation.IgnorRead;
 import com.riozenc.titanTool.common.json.annotation.IgnorWrite;
 
@@ -91,5 +93,9 @@ public class GsonUtils {
 
 		return GSON.fromJson(json, typeOfT);
 	}
-
+	
+	public static <T> T readValueToList(String json,Class<T> clazz) {
+		Type typeOfT = TypeToken.getParameterized(List.class, clazz).getType();
+		return readValueToList(json, typeOfT);
+	}
 }

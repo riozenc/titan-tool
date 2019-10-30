@@ -23,14 +23,12 @@ import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.model.DeleteOneModel;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.WriteModel;
 import com.mongodb.client.result.DeleteResult;
 import com.riozenc.titanTool.common.json.utils.GsonUtils;
-import com.riozenc.titanTool.common.json.utils.JSONUtil;
 import com.riozenc.titanTool.common.string.StringUtils;
 import com.riozenc.titanTool.mongo.spring.MongoTemplateFactory;
 import com.riozenc.titanTool.mybatis.pagination.Page;
@@ -199,9 +197,9 @@ public interface MongoDAOSupport {
 			Document document = mongoCursor.next();
 			result.add(document);
 		}
-
-		logger.info(collection.getNamespace().getFullName() + "::" + filter.getMatch().toString() + "+"
-				+ filter.getGroup() + "====" + result.size());
+//		if(logger.isDebugEnabled()) {			
+//			logger.info(collection.getNamespace().getFullName() + "::" + filter.info() + "====" + result.size());
+//		}
 
 		return result;
 	}
@@ -250,6 +248,20 @@ public interface MongoDAOSupport {
 	}
 
 	interface MongoAggregateFilter {
+
+		List<? extends Bson> getPipeline();
+
+		String info();
+
+		Bson setMatch();
+
+		default Bson getMatch() {
+			return new Document("$match", setMatch());
+		}
+
+	}
+
+	interface MongoAggregateGroupFilter extends MongoAggregateFilter {
 		default List<? extends Bson> getPipeline() {
 			List<Bson> pipeLine = new LinkedList<>();
 			pipeLine.add(getMatch());
@@ -259,14 +271,59 @@ public interface MongoDAOSupport {
 
 		Bson setGroup();
 
-		Bson setMatch();
-
 		default Bson getGroup() {
 			return new Document("$group", setGroup());
-		};
+		}
 
-		default Bson getMatch() {
-			return new Document("$match", setMatch());
+		@Override
+		default String info() {
+			// TODO Auto-generated method stub
+			return getMatch().toString() + "+" + getGroup();
+		}
+	}
+
+	interface MongoAggregateGraphLookupFilter extends MongoAggregateFilter {
+		Bson setGraphLookup();
+
+		default Bson getGraphLookup() {
+			return new Document("$graphLookup", setGraphLookup());
+		}
+
+		default List<? extends Bson> getPipeline() {
+			List<Bson> pipeLine = new LinkedList<>();
+			pipeLine.add(getMatch());
+			pipeLine.add(getGraphLookup());
+			return pipeLine;
+		}
+
+		@Override
+		default String info() {
+			// TODO Auto-generated method stub
+			return getMatch().toString() + "+" + setGraphLookup();
+		}
+	}
+
+	interface MongoAggregateLookupFilter extends MongoAggregateFilter {
+
+		Bson setLookup();
+
+		default Bson getLookup() {
+			return new Document("$lookup", setLookup());
+		}
+
+		@Override
+		default List<? extends Bson> getPipeline() {
+			// TODO Auto-generated method stub
+			List<Bson> pipeLine = new LinkedList<>();
+			pipeLine.add(getMatch());
+			pipeLine.add(getLookup());
+			return pipeLine;
+		}
+
+		@Override
+		default String info() {
+			// TODO Auto-generated method stub
+			return getMatch().toString() + "+" + getLookup();
 		}
 
 	}
