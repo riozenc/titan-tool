@@ -86,19 +86,22 @@ public class TitanTemplate {
 		HttpEntity<?> httpEntity = new HttpEntity<>(params, httpHeaders);
 		Type typeOfT = TypeToken.getParameterized(List.class, clazz).getType();
 
+		String json = http(serverName, realUrl, httpEntity);
+
 		try {
-			return GsonUtils.readValueToList(http(serverName, realUrl, httpEntity), typeOfT);
+			return GsonUtils.readValueToList(json, typeOfT);
 		} catch (JsonSyntaxException e) {
-			return GsonUtils.readValueToList(parseJson(http(serverName, realUrl, httpEntity)), typeOfT);
+			return GsonUtils.readValueToList(parseJson(json), typeOfT);
 		}
 	}
 
-	public <T> TitanCallback<T> postCallBack(String serverName, String url, HttpHeaders httpHeaders, Map<?, ?> params,
+	public <T, V> TitanCallback<T> postCallBack(String serverName, String url, HttpHeaders httpHeaders, V params,
 			Class<T> responseType) throws JsonParseException, JsonMappingException, IOException {
 
 		String realUrl = "http://" + serverName + "/" + url;
 
-		HttpEntity<Map<?, ?>> httpEntity = new HttpEntity<>(params, httpHeaders);
+		HttpEntity<V> httpEntity = new HttpEntity<>(params, httpHeaders);
+
 		String json = restTemplate.postForObject(realUrl, httpEntity, String.class);
 
 		return new TitanCallback<T>() {
@@ -134,7 +137,11 @@ public class TitanTemplate {
 		if (jsonElement.isJsonObject()) {
 			if (jsonElement.getAsJsonObject().get("statusCode").getAsInt() == 200
 					&& jsonElement.getAsJsonObject().get("message") != null) {
-				return jsonElement.getAsJsonObject().get("message").toString();
+				if (jsonElement.getAsJsonObject().get("message").getAsJsonObject().get("list") != null) {
+					return jsonElement.getAsJsonObject().get("message").getAsJsonObject().get("list").toString();
+				} else {
+					return jsonElement.getAsJsonObject().get("message").toString();
+				}
 			}
 		}
 		return json;
@@ -146,13 +153,13 @@ public class TitanTemplate {
 
 		JsonElement jsonElement = GsonUtils.readValue(json, JsonElement.class);
 
-		if (jsonElement.isJsonObject()) {
-			if (jsonElement.getAsJsonObject().get("statusCode").getAsInt() == 200
-					&& jsonElement.getAsJsonObject().get("message") != null) {
-				System.out.println(jsonElement.getAsJsonObject().get("message").toString());
-				return;
-			}
-		}
+//		if (jsonElement.isJsonObject()) {
+//			if (jsonElement.getAsJsonObject().get("statusCode").getAsInt() == 200
+//					&& jsonElement.getAsJsonObject().get("message") != null) {
+//				System.out.println(jsonElement.getAsJsonObject().get("message").toString());
+//				return;
+//			}
+//		}
 
 		System.out.println(json);
 

@@ -93,9 +93,11 @@ public class GsonUtils {
 
 		return GSON.fromJson(json, typeOfT);
 	}
-	
-	public static <T> T readValueToList(String json,Class<T> clazz) {
+
+	public static <T>List<T> readValueToList(String json, Class<T> clazz) {
+
 		Type typeOfT = TypeToken.getParameterized(List.class, clazz).getType();
-		return readValueToList(json, typeOfT);
+
+		return GSON.fromJson(json, typeOfT);
 	}
 }
