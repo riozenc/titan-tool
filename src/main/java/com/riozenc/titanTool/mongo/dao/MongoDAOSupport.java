@@ -24,6 +24,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.InsertOneModel;
+import com.mongodb.client.model.UpdateManyModel;
 import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.WriteModel;
@@ -95,11 +96,14 @@ public interface MongoDAOSupport {
 		List<WriteModel<Document>> requests = new ArrayList<>();
 		params.stream().forEach(p -> {
 			Bson filter = mongoUpdateFilter.filter(p);
-			Bson update = mongoUpdateFilter.update(Document.parse(GsonUtils.toJsonIgnoreNull(p)));
-			UpdateOneModel<Document> updateOneModel = new UpdateOneModel<>(filter, update,
+			Bson update = mongoUpdateFilter.update(mongoUpdateFilter.setUpdate(p));
+//			UpdateOneModel<Document> updateOneModel = new UpdateOneModel<>(filter, update,
+//					new UpdateOptions().upsert(isUpsert));
+
+			UpdateManyModel<Document> updateManyModel = new UpdateManyModel<>(filter, update,
 					new UpdateOptions().upsert(isUpsert));
 
-			requests.add(updateOneModel);
+			requests.add(updateManyModel);
 		});
 
 		return requests;
@@ -214,7 +218,7 @@ public interface MongoDAOSupport {
 			result.add(document);
 		}
 //		if(logger.isDebugEnabled()) {			
-//			logger.info(collection.getNamespace().getFullName() + "::" + filter.info() + "====" + result.size());
+			logger.info(collection.getNamespace().getFullName() + "::" + filter.info() + "====" + result.size());
 //		}
 
 		return result;
@@ -252,6 +256,8 @@ public interface MongoDAOSupport {
 
 	interface MongoUpdateFilter2<T> {
 		Bson filter(T t);
+
+		Document setUpdate(T t);
 
 		default Bson update(Document param) {
 			return new Document("$set", param);

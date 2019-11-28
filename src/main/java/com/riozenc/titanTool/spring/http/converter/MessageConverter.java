@@ -18,6 +18,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.StreamUtils;
 
+import com.google.gson.Gson;
+import com.riozenc.titanTool.common.json.utils.GsonUtils;
 import com.riozenc.titanTool.common.json.utils.JSONUtil;
 
 public class MessageConverter extends AbstractHttpMessageConverter<Object> {
@@ -48,6 +50,7 @@ public class MessageConverter extends AbstractHttpMessageConverter<Object> {
 	@Override
 	protected boolean supports(Class<?> clazz) {
 		// TODO Auto-generated method stub
+//		return String.class == clazz;
 		return true;
 	}
 
@@ -56,9 +59,11 @@ public class MessageConverter extends AbstractHttpMessageConverter<Object> {
 			throws IOException, HttpMessageNotReadableException {
 		// TODO Auto-generated method stub
 
-		System.out.println(clazz);
+		Charset charset = getContentTypeCharset(inputMessage.getHeaders().getContentType());
 
-		return null;
+//		System.out.println(StreamUtils.copyToString(inputMessage.getBody(), charset));
+
+		return StreamUtils.copyToString(inputMessage.getBody(), charset);
 	}
 
 	@Override
@@ -69,7 +74,8 @@ public class MessageConverter extends AbstractHttpMessageConverter<Object> {
 		String message = null;
 		if (outputMessage.getHeaders().getContentType().isCompatibleWith(MediaType.APPLICATION_JSON_UTF8)) {
 			// json
-			message = JSONUtil.toJsonString(t);
+//			message = JSONUtil.toJsonString(t);
+			message = GsonUtils.toJsonIgnoreNull(t);
 		} else if (outputMessage.getHeaders().getContentType().isCompatibleWith(MediaType.APPLICATION_XML)) {
 			// xml
 //			message = XmlUtils.object2xml(t);

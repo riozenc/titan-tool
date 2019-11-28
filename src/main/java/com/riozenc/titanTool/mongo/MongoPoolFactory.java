@@ -9,6 +9,7 @@ package com.riozenc.titanTool.mongo;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
@@ -25,6 +26,7 @@ public class MongoPoolFactory {
 	public static void init(String username, String password, String databaseName) {
 		if (mongoClient == null) {
 			MongoCredential credential = MongoCredential.createScramSha1Credential(username, databaseName,
+//			MongoCredential credential = MongoCredential.createCredential(username, databaseName,//mongo2.0
 					password.toCharArray());
 
 			mongoClient = new MongoClient(getSeeds(), credential, createMongoClientOptions());

@@ -10,12 +10,24 @@ public class HttpResult {
 	public static final int ERROR = 300;
 
 	private Integer statusCode;
+
 	private Object message;
 
-	public HttpResult() {}
+	private Object resultData;
+
+	public HttpResult() {
+	}
+
 	public HttpResult(Integer statusCode, Object message) {
 		this.statusCode = statusCode;
 		this.message = message;
+		this.resultData = null;
+	}
+
+	public HttpResult(Integer statusCode, Object message, Object resultData) {
+		this.statusCode = statusCode;
+		this.message = message;
+		this.resultData = resultData;
 	}
 
 	public Integer getStatusCode() {
@@ -33,4 +45,13 @@ public class HttpResult {
 	public void setMessage(Object message) {
 		this.message = message;
 	}
+
+	public Object getResultData() {
+		return resultData;
+	}
+
+	public void setResultData(Object resultData) {
+		this.resultData = resultData;
+	}
+
 }
