@@ -156,7 +156,7 @@ public interface MongoDAOSupport {
 	default <T> List<T> findManyByPage(String collectionName, MongoFindFilter filter, Class<T> clazz) {
 		MongoCollection<Document> collection = getMongoTemplate().getCollection(collectionName);
 		FindIterable<Document> findIterable = null;
-		if (filter.getPage() != null) {
+		if (filter.getPage() != null && filter.getPage().getPageSize()!=-1) {
 			findIterable = collection.find(filter.filter()).sort(filter.getSort())
 					.skip(Math.multiplyExact(filter.getPage().getPageSize(), filter.getPage().getPageCurrent() - 1))
 					.limit(filter.getPage().getPageSize());
@@ -193,6 +193,11 @@ public interface MongoDAOSupport {
 		return result;
 	}
 
+	default long getCount(String collectionName, MongoFindFilter filter) {
+		MongoCollection<Document> collection = getMongoTemplate().getCollection(collectionName);
+		return collection.countDocuments(filter.filter());
+	}
+
 	default long deleteMany(String collectionName, MongoDeleteFilter filter) {
 
 		MongoCollection<Document> collection = getMongoTemplate().getCollection(collectionName);
@@ -218,7 +223,7 @@ public interface MongoDAOSupport {
 			result.add(document);
 		}
 //		if(logger.isDebugEnabled()) {			
-			logger.info(collection.getNamespace().getFullName() + "::" + filter.info() + "====" + result.size());
+		logger.info(collection.getNamespace().getFullName() + "::" + filter.info() + "====" + result.size());
 //		}
 
 		return result;
