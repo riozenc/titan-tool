@@ -123,6 +123,20 @@ public interface MongoDAOSupport {
 		return requests;
 	}
 
+	default List<WriteModel<Document>> updateMany(List<Document> documents, MongoUpdateFilter mongoUpdateFilter,
+			boolean isUpsert, List<? extends Bson> arrayFilters) {
+		List<WriteModel<Document>> requests = new ArrayList<>();
+		documents.stream().forEach(d -> {
+			Bson filter = mongoUpdateFilter.filter(d);
+			Bson update = mongoUpdateFilter.update(d);
+			UpdateOneModel<Document> updateOneModel = new UpdateOneModel<>(filter, update,
+					new UpdateOptions().upsert(isUpsert).arrayFilters(arrayFilters));
+
+			requests.add(updateOneModel);
+		});
+		return requests;
+	}
+
 	default List<String> findMany(MongoCollection<?> collection, MongoFindFilter filter) {
 		FindIterable<String> findIterable = collection.find(filter.filter(), String.class);
 		MongoCursor<String> mongoCursor = findIterable.iterator();
@@ -156,7 +170,7 @@ public interface MongoDAOSupport {
 	default <T> List<T> findManyByPage(String collectionName, MongoFindFilter filter, Class<T> clazz) {
 		MongoCollection<Document> collection = getMongoTemplate().getCollection(collectionName);
 		FindIterable<Document> findIterable = null;
-		if (filter.getPage() != null && filter.getPage().getPageSize()!=-1) {
+		if (filter.getPage() != null && filter.getPage().getPageSize() != -1) {
 			findIterable = collection.find(filter.filter()).sort(filter.getSort())
 					.skip(Math.multiplyExact(filter.getPage().getPageSize(), filter.getPage().getPageCurrent() - 1))
 					.limit(filter.getPage().getPageSize());
@@ -359,7 +373,7 @@ public interface MongoDAOSupport {
 		@Override
 		default String info() {
 			// TODO Auto-generated method stub
-			return getMatch().toString() + "+" + getLookup();
+			return GsonUtils.toJson(getPipeline());
 		}
 
 	}

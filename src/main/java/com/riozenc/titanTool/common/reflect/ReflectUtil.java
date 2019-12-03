@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -270,6 +271,10 @@ public class ReflectUtil {
 	 */
 	public static Object typeFormat(Class<?> clazz, Object value) throws Exception {
 
+		if (value != null && value.getClass().equals(clazz)) {
+			return value;
+		}
+
 		if (String.class.equals(clazz)) {
 			if (null == value || "".equals(value)) {
 				return null;
@@ -320,7 +325,7 @@ public class ReflectUtil {
 				} else if (Date.class.equals(clazz)) {
 					return null;
 				} else {
-					throw new Exception("value为null或\"\"找不到匹配的类型:" + clazz.getName());
+					return null;
 				}
 			} else if (Long.class.equals(clazz) || long.class.equals(clazz)) {
 				return new Long(value.toString());
@@ -347,6 +352,7 @@ public class ReflectUtil {
 			} else {
 				throw new Exception("没有匹配的类型:" + clazz.getName());
 			}
+
 		}
 	}
 
@@ -374,7 +380,7 @@ public class ReflectUtil {
 					for (Field tField : srcFieldList) {
 						if (sField.getName().equals(tField.getName())) {
 							ReflectUtil.setFieldValue(tarObj, tField.getName(),
-									ReflectUtil.getFieldValue(srcObj, sField.getName()));
+									typeFormat(sField.getType(), ReflectUtil.getFieldValue(srcObj, sField.getName())));
 						}
 					}
 				}
@@ -383,6 +389,9 @@ public class ReflectUtil {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
