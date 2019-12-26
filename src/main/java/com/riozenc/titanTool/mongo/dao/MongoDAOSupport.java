@@ -102,6 +102,10 @@ public interface MongoDAOSupport {
 
 			UpdateManyModel<Document> updateManyModel = new UpdateManyModel<>(filter, update,
 					new UpdateOptions().upsert(isUpsert));
+			
+//			if(logger.isDebugEnabled()) {				
+//				logger.info("filter : "+filter + "   update:"+update);
+//			}
 
 			requests.add(updateManyModel);
 		});
@@ -162,8 +166,11 @@ public interface MongoDAOSupport {
 			result.add(GsonUtils.readValue(
 					document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
 		}
-		logger.info(collection.getNamespace().getFullName() + "::findMany::" + filter.filter().toString() + "===="
-				+ result.size());
+//		if(logger.isDebugEnabled()) {
+//			logger.info(collection.getNamespace().getFullName() + "::findMany::" + filter.filter().toString() + "===="
+//					+ result.size());
+//		}
+		
 		return result;
 	}
 
@@ -187,8 +194,8 @@ public interface MongoDAOSupport {
 					document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
 		}
 
-		logger.info(collection.getNamespace().getFullName() + "::findManyByPage::" + filter.filter().toString() + "===="
-				+ result.size());
+//		logger.info(collection.getNamespace().getFullName() + "::findManyByPage::" + filter.filter().toString() + "===="
+//				+ result.size());
 		return result;
 	}
 
@@ -202,8 +209,8 @@ public interface MongoDAOSupport {
 					document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
 		}
 
-		logger.info(collection.getNamespace().getFullName() + "::findMany::" + filter.filter().toString() + "===="
-				+ result.size());
+//		logger.info(collection.getNamespace().getFullName() + "::findMany::" + filter.filter().toString() + "===="
+//				+ result.size());
 		return result;
 	}
 
