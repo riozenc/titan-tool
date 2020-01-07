@@ -102,8 +102,6 @@ public class TitanTemplate {
 
 		HttpEntity<V> httpEntity = new HttpEntity<>(params, httpHeaders);
 
-//		System.out.println(GsonUtils.toJsonIgnoreNull(params));
-
 		String json = restTemplate.postForObject(realUrl, httpEntity, String.class);
 
 		return new TitanCallback<T>() {

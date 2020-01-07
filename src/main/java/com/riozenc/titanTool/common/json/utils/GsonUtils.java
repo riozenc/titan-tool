@@ -19,7 +19,7 @@ import com.riozenc.titanTool.common.json.annotation.IgnorWrite;
 
 public class GsonUtils {
 
-	private final static Gson GSON = new Gson();
+	private final static Gson GSON = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
 	private final static Gson IGNORE_NULL_GOSN = new GsonBuilder()// 建造者模式设置不同的配置
 			.disableHtmlEscaping()// 防止对网址乱码 忽略对特殊字符的转换
@@ -40,7 +40,6 @@ public class GsonUtils {
 
 				@Override
 				public boolean shouldSkipClass(Class<?> clazz) {
-					// TODO Auto-generated method stub
 					return false;
 				}
 			}).create();
@@ -50,7 +49,6 @@ public class GsonUtils {
 
 				@Override
 				public boolean shouldSkipField(FieldAttributes f) {
-					// TODO Auto-generated method stub
 					IgnorWrite ignorWrite = f.getAnnotation(IgnorWrite.class);
 					if (ignorWrite != null) {
 						return true;
@@ -60,7 +58,6 @@ public class GsonUtils {
 
 				@Override
 				public boolean shouldSkipClass(Class<?> clazz) {
-					// TODO Auto-generated method stub
 					return false;
 				}
 			}).create();
@@ -94,7 +91,7 @@ public class GsonUtils {
 		return GSON.fromJson(json, typeOfT);
 	}
 
-	public static <T>List<T> readValueToList(String json, Class<T> clazz) {
+	public static <T> List<T> readValueToList(String json, Class<T> clazz) {
 
 		Type typeOfT = TypeToken.getParameterized(List.class, clazz).getType();
 

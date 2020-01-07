@@ -23,6 +23,7 @@ import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.DeleteOneModel;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.UpdateManyModel;
 import com.mongodb.client.model.UpdateOneModel;
@@ -91,6 +92,15 @@ public interface MongoDAOSupport {
 		return requests;
 	}
 
+	default List<WriteModel<Document>> deleteMany(List<Document> documents, MongoDeleteFilter2 mongoDeleteFilter2) {
+		List<WriteModel<Document>> requests = new LinkedList<>();
+		documents.stream().forEach(d -> {
+			DeleteOneModel<Document> deleteOneModel = new DeleteOneModel<>(mongoDeleteFilter2.filter(d));
+			requests.add(deleteOneModel);
+		});
+		return requests;
+	}
+
 	default <V> List<WriteModel<Document>> updateMany2(List<V> params, MongoUpdateFilter2<V> mongoUpdateFilter,
 			boolean isUpsert) {
 		List<WriteModel<Document>> requests = new ArrayList<>();
@@ -102,10 +112,8 @@ public interface MongoDAOSupport {
 
 			UpdateManyModel<Document> updateManyModel = new UpdateManyModel<>(filter, update,
 					new UpdateOptions().upsert(isUpsert));
-			
-//			if(logger.isDebugEnabled()) {				
-//				logger.info("filter : "+filter + "   update:"+update);
-//			}
+
+			logger.debug("filter : " + filter + "   update:" + update);
 
 			requests.add(updateManyModel);
 		});
@@ -166,11 +174,10 @@ public interface MongoDAOSupport {
 			result.add(GsonUtils.readValue(
 					document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
 		}
-//		if(logger.isDebugEnabled()) {
-//			logger.info(collection.getNamespace().getFullName() + "::findMany::" + filter.filter().toString() + "===="
-//					+ result.size());
-//		}
-		
+
+		logger.debug(collection.getNamespace().getFullName() + "::findMany::" + filter.filter().toString() + "===="
+				+ result.size());
+
 		return result;
 	}
 
@@ -194,8 +201,8 @@ public interface MongoDAOSupport {
 					document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
 		}
 
-//		logger.info(collection.getNamespace().getFullName() + "::findManyByPage::" + filter.filter().toString() + "===="
-//				+ result.size());
+		logger.debug(collection.getNamespace().getFullName() + "::findManyByPage::" + filter.filter().toString()
+				+ "====" + result.size());
 		return result;
 	}
 
@@ -205,12 +212,13 @@ public interface MongoDAOSupport {
 		List<T> result = new ArrayList<>();
 		while (mongoCursor.hasNext()) {
 			Document document = mongoCursor.next();
+			document.remove("_id");// mongo默认的_id 是objectId类型，默认去掉
 			result.add(GsonUtils.readValue(
 					document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
 		}
 
-//		logger.info(collection.getNamespace().getFullName() + "::findMany::" + filter.filter().toString() + "===="
-//				+ result.size());
+		logger.debug(collection.getNamespace().getFullName() + "::findMany::" + filter.filter().toString() + "===="
+				+ result.size());
 		return result;
 	}
 
@@ -224,7 +232,7 @@ public interface MongoDAOSupport {
 		MongoCollection<Document> collection = getMongoTemplate().getCollection(collectionName);
 
 		DeleteResult deleteResult = collection.deleteMany(filter.filter());
-		logger.info(collection.getNamespace().getFullName() + "::deleteMany::" + filter.filter().toString() + "===="
+		logger.debug(collection.getNamespace().getFullName() + "::deleteMany::" + filter.filter().toString() + "===="
 				+ deleteResult.getDeletedCount());
 		return deleteResult.getDeletedCount();
 	}
@@ -243,9 +251,8 @@ public interface MongoDAOSupport {
 			Document document = mongoCursor.next();
 			result.add(document);
 		}
-//		if(logger.isDebugEnabled()) {			
-		logger.info(collection.getNamespace().getFullName() + "::" + filter.info() + "====" + result.size());
-//		}
+
+		logger.debug(collection.getNamespace().getFullName() + "::" + filter.info() + "====" + result.size());
 
 		return result;
 	}
@@ -304,6 +311,11 @@ public interface MongoDAOSupport {
 		Bson filter();
 	}
 
+	interface MongoDeleteFilter2 {
+
+		Bson filter(Document param);
+	}
+
 	interface MongoAggregateFilter {
 
 		List<? extends Bson> getPipeline();
@@ -334,7 +346,6 @@ public interface MongoDAOSupport {
 
 		@Override
 		default String info() {
-			// TODO Auto-generated method stub
 			return getMatch().toString() + "+" + getGroup();
 		}
 	}
@@ -355,7 +366,6 @@ public interface MongoDAOSupport {
 
 		@Override
 		default String info() {
-			// TODO Auto-generated method stub
 			return getMatch().toString() + "+" + setGraphLookup();
 		}
 	}
@@ -370,7 +380,6 @@ public interface MongoDAOSupport {
 
 		@Override
 		default List<? extends Bson> getPipeline() {
-			// TODO Auto-generated method stub
 			List<Bson> pipeLine = new LinkedList<>();
 			pipeLine.add(getLookup());
 			pipeLine.add(getMatch());
@@ -379,7 +388,6 @@ public interface MongoDAOSupport {
 
 		@Override
 		default String info() {
-			// TODO Auto-generated method stub
 			return GsonUtils.toJson(getPipeline());
 		}
 
