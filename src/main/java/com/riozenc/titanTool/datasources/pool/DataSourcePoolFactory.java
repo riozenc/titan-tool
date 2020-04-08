@@ -40,7 +40,7 @@ public class DataSourcePoolFactory {
 		factoryBean.setTypeAliasesPackage(Global.getConfig("namespace"));
 		factoryBean.setTypeAliasesSuperType(MybatisEntity.class);
 		factoryBean.setMapperLocations(new PathMatchingResourcePatternResolver()
-				.getResources("classpath:/" + Global.getConfig("namespace").replaceAll("\\.", "/") + "/webapp/**/*.xml"));
+				.getResources("classpath:/" + Global.getConfig("namespace").replaceAll("\\.", "/") + "/**/webapp/**/*.xml"));
 		factoryBean.setConfigLocation(
 				new PathMatchingResourcePatternResolver().getResource("classpath:mybatis-config.xml"));
 

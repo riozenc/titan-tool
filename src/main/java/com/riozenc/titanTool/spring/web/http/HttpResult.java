@@ -7,7 +7,7 @@ package com.riozenc.titanTool.spring.web.http;
 
 public class HttpResult<T> {
 	public static final int SUCCESS = 200;
-	public static final int ERROR = 300;
+	public static final int ERROR = 500;
 
 	private Integer statusCode;
 
