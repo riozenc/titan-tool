@@ -7,6 +7,7 @@
 package com.riozenc.titanTool.mongo.dao;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,6 +32,7 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.WriteModel;
 import com.mongodb.client.result.DeleteResult;
 import com.riozenc.titanTool.common.json.utils.GsonUtils;
+import com.riozenc.titanTool.common.json.utils.JSONUtil;
 import com.riozenc.titanTool.common.string.StringUtils;
 import com.riozenc.titanTool.mongo.spring.MongoTemplateFactory;
 import com.riozenc.titanTool.mybatis.pagination.Page;
@@ -71,6 +73,14 @@ public interface MongoDAOSupport {
 		list.parallelStream().forEach(m -> {
 //			documents.add(Document.parse(JSONUtil.toJsonString(callBack.call(m))));
 			documents.add(Document.parse(GsonUtils.toJsonIgnoreNull(callBack.call(m))));
+		});
+		return documents;
+	}
+
+	default <T> List<Document> toDocuments(Collection<T> list, ToDocumentCallBack<T> callBack) {
+		List<Document> documents = Collections.synchronizedList(new ArrayList<>());
+		list.parallelStream().forEach(m -> {
+			documents.add(Document.parse(JSONUtil.toJsonString(callBack.call(m))));
 		});
 		return documents;
 	}
@@ -212,7 +222,6 @@ public interface MongoDAOSupport {
 		List<T> result = new ArrayList<>();
 		while (mongoCursor.hasNext()) {
 			Document document = mongoCursor.next();
-			document.remove("_id");// mongo默认的_id 是objectId类型，默认去掉
 			result.add(GsonUtils.readValue(
 					document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
 		}
