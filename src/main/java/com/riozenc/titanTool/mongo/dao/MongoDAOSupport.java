@@ -39,7 +39,7 @@ import com.riozenc.titanTool.mybatis.pagination.Page;
 import com.riozenc.titanTool.properties.Global;
 
 public interface MongoDAOSupport {
-	final Log logger = LogFactory.getLog(MongoDAOSupport.class);
+	static final Log logger = LogFactory.getLog(MongoDAOSupport.class);
 	static final String separatorChar = "#";
 
 	default MongoTemplate getMongoTemplate() {
@@ -243,6 +243,7 @@ public interface MongoDAOSupport {
 		DeleteResult deleteResult = collection.deleteMany(filter.filter());
 		logger.debug(collection.getNamespace().getFullName() + "::deleteMany::" + filter.filter().toString() + "===="
 				+ deleteResult.getDeletedCount());
+
 		return deleteResult.getDeletedCount();
 	}
 
