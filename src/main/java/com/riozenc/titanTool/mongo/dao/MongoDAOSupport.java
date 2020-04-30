@@ -243,6 +243,7 @@ public interface MongoDAOSupport {
 		DeleteResult deleteResult = collection.deleteMany(filter.filter());
 		logger.debug(collection.getNamespace().getFullName() + "::deleteMany::" + filter.filter().toString() + "===="
 				+ deleteResult.getDeletedCount());
+		
 
 		return deleteResult.getDeletedCount();
 	}
