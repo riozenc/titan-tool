@@ -39,7 +39,7 @@ import com.riozenc.titanTool.mybatis.pagination.Page;
 import com.riozenc.titanTool.properties.Global;
 
 public interface MongoDAOSupport {
-	static final Log logger = LogFactory.getLog(MongoDAOSupport.class);
+	static final Log logger = LogFactory.getLog("mongodb ");
 	static final String separatorChar = "#";
 
 	default MongoTemplate getMongoTemplate() {
@@ -263,7 +263,7 @@ public interface MongoDAOSupport {
 			result.add(document);
 		}
 
-		logger.debug(collection.getNamespace().getFullName() + "::" + filter.info() + "====" + result.size());
+		logger.info(collection.getNamespace().getFullName() + ":aggregate:" + filter.info() + "====" + result.size());
 
 		return result;
 	}
