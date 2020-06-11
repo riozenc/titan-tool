@@ -241,7 +241,7 @@ public interface MongoDAOSupport {
 		MongoCollection<Document> collection = getMongoTemplate().getCollection(collectionName);
 
 		DeleteResult deleteResult = collection.deleteMany(filter.filter());
-		logger.debug(collection.getNamespace().getFullName() + "::deleteMany::" + filter.filter().toString() + "===="
+		logger.info(collection.getNamespace().getFullName() + "::deleteMany::" + filter.filter().toString() + "===="
 				+ deleteResult.getDeletedCount());
 		
 
