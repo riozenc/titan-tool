@@ -26,7 +26,7 @@ public class GsonUtils {
 			.setDateFormat("yyyy-MM-dd HH:mm:ss") // 设置日期的格式
 			.create();
 
-	private final static Gson ignorReadGson = new GsonBuilder()
+	private final static Gson ignorReadGson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss")
 			.addSerializationExclusionStrategy(new ExclusionStrategy() {
 
 				@Override

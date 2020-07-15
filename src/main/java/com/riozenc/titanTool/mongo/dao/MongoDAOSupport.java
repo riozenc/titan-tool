@@ -62,8 +62,7 @@ public interface MongoDAOSupport {
 	default List<Document> toDocuments(List<?> list) {
 		List<Document> documents = Collections.synchronizedList(new ArrayList<>());
 		list.parallelStream().forEach(m -> {
-//			documents.add(Document.parse(JSONUtil.toJsonString(m)));
-			documents.add(Document.parse(GsonUtils.toJsonIgnoreNull(m)));
+			documents.add(Document.parse(GsonUtils.getIgnorReadGson().toJson(m)));
 		});
 		return documents;
 	}
@@ -222,11 +221,19 @@ public interface MongoDAOSupport {
 		List<T> result = new ArrayList<>();
 		while (mongoCursor.hasNext()) {
 			Document document = mongoCursor.next();
-			result.add(GsonUtils.readValue(
-					document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
+			try {
+				result.add(GsonUtils.getIgnorWriteGson().fromJson(
+						document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
+			} catch (Exception e) {
+				logger.error(document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()));
+				throw new RuntimeException(document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()));
+			}
+
+//			result.add(GsonUtils.readValue(
+//					document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
 		}
 
-		logger.debug(collection.getNamespace().getFullName() + "::findMany::" + filter.filter().toString() + "===="
+		logger.info(collection.getNamespace().getFullName() + "::findMany::" + filter.filter().toString() + "===="
 				+ result.size());
 		return result;
 	}
@@ -243,7 +250,6 @@ public interface MongoDAOSupport {
 		DeleteResult deleteResult = collection.deleteMany(filter.filter());
 		logger.info(collection.getNamespace().getFullName() + "::deleteMany::" + filter.filter().toString() + "===="
 				+ deleteResult.getDeletedCount());
-		
 
 		return deleteResult.getDeletedCount();
 	}
