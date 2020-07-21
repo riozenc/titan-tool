@@ -6,6 +6,7 @@
 **/
 package com.riozenc.titanTool.mongo.dao;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,8 +32,10 @@ import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.WriteModel;
 import com.mongodb.client.result.DeleteResult;
+import com.riozenc.titanTool.annotation.MongoWriteIgnore;
 import com.riozenc.titanTool.common.json.utils.GsonUtils;
 import com.riozenc.titanTool.common.json.utils.JSONUtil;
+import com.riozenc.titanTool.common.reflect.ReflectUtil;
 import com.riozenc.titanTool.common.string.StringUtils;
 import com.riozenc.titanTool.mongo.spring.MongoTemplateFactory;
 import com.riozenc.titanTool.mybatis.pagination.Page;
@@ -219,18 +222,20 @@ public interface MongoDAOSupport {
 		FindIterable<Document> findIterable = collection.find(filter.filter());
 		MongoCursor<Document> mongoCursor = findIterable.iterator();
 		List<T> result = new ArrayList<>();
+		List<String> removeList = new ArrayList<>();
+		Field[] fields = ReflectUtil.getFields(clazz);
+		for (Field field : fields) {
+			if (field.isAnnotationPresent(MongoWriteIgnore.class)) {
+				removeList.add(field.getName());
+			}
+		}
 		while (mongoCursor.hasNext()) {
 			Document document = mongoCursor.next();
-			try {
-				result.add(GsonUtils.getIgnorWriteGson().fromJson(
-						document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
-			} catch (Exception e) {
-				logger.error(document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()));
-				throw new RuntimeException(document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()));
-			}
-
-//			result.add(GsonUtils.readValue(
-//					document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build()), clazz));
+			removeList.forEach(name -> {
+				document.remove(name);
+			});
+			String json = document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build());
+			result.add(GsonUtils.readValue(json, clazz));
 		}
 
 		logger.info(collection.getNamespace().getFullName() + "::findMany::" + filter.filter().toString() + "===="
