@@ -29,7 +29,7 @@ public class MongoTemplateFactory {
 		}
 
 		if (MAP.get(databaseName) == null) {
-			MongoTemplate mongoTemplate = new MongoTemplate(MongoPoolFactory.getMongoClient(databaseName), databaseName);
+			MongoTemplate mongoTemplate = new MongoTemplate(MongoPoolFactory.getMongoClient(), databaseName);
 			MAP.put(databaseName, mongoTemplate);
 		}
 		return MAP.get(databaseName);
