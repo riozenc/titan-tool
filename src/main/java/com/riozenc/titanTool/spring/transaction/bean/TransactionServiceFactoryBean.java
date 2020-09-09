@@ -20,7 +20,6 @@ import com.riozenc.titanTool.annotation.TransactionDAO;
 import com.riozenc.titanTool.annotation.utils.AnnotationUtil;
 import com.riozenc.titanTool.common.reflect.ReflectUtil;
 import com.riozenc.titanTool.common.string.StringUtils;
-import com.riozenc.titanTool.spring.context.SpringContextHolder;
 import com.riozenc.titanTool.spring.transaction.proxy.TransactionServiceProxyFactory2;
 import com.riozenc.titanTool.spring.webapp.dao.AbstractTransactionDAOSupport;
 
@@ -77,8 +76,12 @@ public class TransactionServiceFactoryBean<T> implements FactoryBean<T> {
 	}
 
 	private T build() throws Exception {
+
 		T service = beanFacotry.createBean(serviceInterface);
+
+//		Field[] fields = ReflectUtil.getFields(this.serviceInterface);
 		Field[] fields = this.serviceInterface.getDeclaredFields();
+
 		for (Field field : fields) {
 			if (null != field.getAnnotation(TransactionDAO.class)) {
 				ReflectUtil.setFieldValue(service, field.getName(), processTransactionDAO(field));// 给service赋值dao
