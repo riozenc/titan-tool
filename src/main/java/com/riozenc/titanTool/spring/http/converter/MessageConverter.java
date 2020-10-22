@@ -18,9 +18,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.StreamUtils;
 
-import com.google.gson.Gson;
 import com.riozenc.titanTool.common.json.utils.GsonUtils;
-import com.riozenc.titanTool.common.json.utils.JSONUtil;
 
 public class MessageConverter extends AbstractHttpMessageConverter<Object> {
 
@@ -42,7 +40,7 @@ public class MessageConverter extends AbstractHttpMessageConverter<Object> {
 	public void setSupportedMediaTypes(List<MediaType> supportedMediaTypes) {
 		// TODO Auto-generated method stub
 		List<MediaType> list = new ArrayList<MediaType>();
-		list.add(MediaType.APPLICATION_JSON_UTF8);
+		list.add(MediaType.APPLICATION_JSON);
 		list.add(MediaType.APPLICATION_XML);
 		super.setSupportedMediaTypes(list);
 	}
@@ -72,7 +70,7 @@ public class MessageConverter extends AbstractHttpMessageConverter<Object> {
 		// TODO Auto-generated method stub
 		Charset charset = getContentTypeCharset(outputMessage.getHeaders().getContentType());
 		String message = null;
-		if (outputMessage.getHeaders().getContentType().isCompatibleWith(MediaType.APPLICATION_JSON_UTF8)) {
+		if (outputMessage.getHeaders().getContentType().isCompatibleWith(MediaType.APPLICATION_JSON)) {
 			// json
 //			message = JSONUtil.toJsonString(t);
 			message = GsonUtils.toJsonIgnoreNull(t);
