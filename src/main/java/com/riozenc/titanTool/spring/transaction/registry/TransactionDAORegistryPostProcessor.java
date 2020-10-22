@@ -22,8 +22,8 @@ import com.riozenc.titanTool.common.string.StringUtils;
 import com.riozenc.titanTool.properties.Global;
 import com.riozenc.titanTool.spring.transaction.scanner.ClassPathTransactionDAOScanner;
 
-public class TransactionDAORegistryPostProcessor extends AbstractRegistryPostProcessor
-		implements BeanDefinitionRegistryPostProcessor {
+public abstract class TransactionDAORegistryPostProcessor
+		implements IDefinitionRegistryProcessor, BeanDefinitionRegistryPostProcessor {
 	private static final Log logger = LogFactory.getLog(TransactionDAORegistryPostProcessor.class);
 	private static final Class<? extends Annotation> annotationClass = TransactionDAO.class;
 
@@ -41,8 +41,7 @@ public class TransactionDAORegistryPostProcessor extends AbstractRegistryPostPro
 		scanner.setAnnotationClass(annotationClass);
 
 		scanner.registerFilters();
-		scanner.scan(StringUtils.tokenizeToStringArray(Global.getConfig(getNamespace()),
-				ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS));
+		scanner.scan(StringUtils.tokenizeToStringArray(getNamespace(),ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS));
 		logger.info("registry " + annotationClass);
 	}
 

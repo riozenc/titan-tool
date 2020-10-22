@@ -19,11 +19,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import com.riozenc.titanTool.annotation.TransactionService;
 import com.riozenc.titanTool.common.string.StringUtils;
-import com.riozenc.titanTool.properties.Global;
 import com.riozenc.titanTool.spring.transaction.scanner.ClassPathTransactionServiceScanner;
 
-public class TransactionServiceRegistryPostProcessor extends AbstractRegistryPostProcessor
-		implements BeanDefinitionRegistryPostProcessor {
+public abstract class TransactionServiceRegistryPostProcessor
+		implements IDefinitionRegistryProcessor, BeanDefinitionRegistryPostProcessor {
 	private static final Log logger = LogFactory.getLog(TransactionServiceRegistryPostProcessor.class);
 	private static final Class<? extends Annotation> annotationClass = TransactionService.class;
 
@@ -40,7 +39,7 @@ public class TransactionServiceRegistryPostProcessor extends AbstractRegistryPos
 		ClassPathTransactionServiceScanner scanner = new ClassPathTransactionServiceScanner(registry);
 		scanner.setAnnotationClass(annotationClass);
 		scanner.registerFilters();
-		scanner.scan(StringUtils.tokenizeToStringArray(Global.getConfig(getNamespace()),
+		scanner.scan(StringUtils.tokenizeToStringArray(getNamespace(),
 				ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS));
 
 		logger.info("registry " + annotationClass);
