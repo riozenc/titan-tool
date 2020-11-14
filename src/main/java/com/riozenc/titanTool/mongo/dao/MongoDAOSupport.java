@@ -58,6 +58,11 @@ public interface MongoDAOSupport {
 		return mongoTemplate;
 	}
 
+	@Deprecated
+	default String getCollectionName(String date, String name) {
+		return date + separatorChar + name;
+	}
+
 	default String getCollectionName(String... params) {
 		return String.join(separatorChar, params);
 	}
@@ -87,8 +92,13 @@ public interface MongoDAOSupport {
 		return documents;
 	}
 
+	@Deprecated
 	default MongoCollection<Document> getCollection(String date, String name) {
 		return getMongoTemplate().getCollection(getCollectionName(date, name));
+	}
+
+	default MongoCollection<Document> getCollection(String collectionName) {
+		return getMongoTemplate().getCollection(collectionName);
 	}
 
 	default void insertMany(MongoCollection<Document> collection, List<Document> documents) {
