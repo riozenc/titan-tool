@@ -58,8 +58,8 @@ public interface MongoDAOSupport {
 		return mongoTemplate;
 	}
 
-	default String getCollectionName(String date, String name) {
-		return date + separatorChar + name;
+	default String getCollectionName(String... params) {
+		return String.join(separatorChar, params);
 	}
 
 	default List<Document> toDocuments(List<?> list) {
