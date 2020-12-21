@@ -66,12 +66,12 @@ public class SqlSessionManager {
 			try {
 				return DataSourcePoolFactory.getSqlSessionFactory(dbName).openSession(executorType, false);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				
+				throw new RuntimeException("获取数据源["+dbName+"]出现错误，请检查配置文件.");
 			}
 		}
 
 		// 不自动提交
-		return sqlSessionFactory.openSession(executorType, false);
+//		return sqlSessionFactory.openSession(executorType, false);
 	}
 }
