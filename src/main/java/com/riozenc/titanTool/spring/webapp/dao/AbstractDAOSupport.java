@@ -15,13 +15,16 @@ import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 
 import com.riozenc.titanTool.mybatis.persistence.PersistanceManager;
+import com.riozenc.titanTool.mybatis.persistence.PersistanceManager2;
 import com.riozenc.titanTool.mybatis.session.SqlSessionManager;
+import com.riozenc.titanTool.properties.Global;
 
 public abstract class AbstractDAOSupport {
 	private static final Log logger = LogFactory.getLog(AbstractDAOSupport.class);
 	private ExecutorType executorType = ExecutorType.SIMPLE;
 	private boolean isProxy = false;
-	private String dbName="master";
+//	private String dbName="master";
+	private String dbName=Global.getConfig("db").split(",")[0];
 	private String NAMESPACE = null;
 
 	private ThreadLocal<Map<String, SqlSession>> localSqlSessionMap = new ThreadLocal<>();
@@ -73,6 +76,34 @@ public abstract class AbstractDAOSupport {
 		getSqlSessionMap().put(dbName + executorType, sqlSession);
 
 		return new PersistanceManager(dbName, sqlSession);
+	}
+	
+	protected PersistanceManager2 getPersistanceManager2(String dbName, ExecutorType executorType, boolean isProxy) {
+
+		Long l = System.currentTimeMillis();
+
+		SqlSession sqlSession = getSqlSessionMap().get(dbName + executorType);
+
+		if (sqlSession == null) {
+			sqlSession = SqlSessionManager.getSession(dbName, executorType);
+		} else {
+			try {
+				if (sqlSession.getConnection().isClosed()) {
+					getSqlSessionMap().remove(sqlSession);
+					sqlSession = SqlSessionManager.getSession(dbName, executorType);
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				getSqlSessionMap().remove(sqlSession);
+				sqlSession = SqlSessionManager.getSession(dbName, executorType);
+			}
+		}
+
+		logger.info("[" + Thread.currentThread().getName() + "]获取SqlSession(" + sqlSession.getConnection() + ")用时:"
+				+ (System.currentTimeMillis() - l) / 1000);
+		getSqlSessionMap().put(dbName + executorType, sqlSession);
+
+		return new PersistanceManager2(dbName, sqlSession);
 	}
 
 	public String getNamespace() {
