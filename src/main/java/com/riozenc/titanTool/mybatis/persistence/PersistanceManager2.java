@@ -9,6 +9,7 @@ package com.riozenc.titanTool.mybatis.persistence;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.session.RowBounds;
@@ -16,6 +17,8 @@ import org.apache.ibatis.session.SqlSession;
 
 import com.riozenc.titanTool.mybatis.MybatisEntity;
 import com.riozenc.titanTool.mybatis.pagination.Page;
+
+import reactor.core.publisher.Flux;
 
 public class PersistanceManager2 {
 
@@ -238,18 +241,24 @@ public class PersistanceManager2 {
 	 * @param obj
 	 * @return
 	 */
-	public <T> Cursor<T> scanTest(String namespace, Object obj) {
+	public <T> Flux<T> scan(String namespace, T obj) {
 		if (Page.class.isAssignableFrom(obj.getClass())) {
 			((Page) obj).setDbName(getDbName());
 		}
-		return session.selectCursor(namespace, obj);
+
+		Cursor<T> cursor = session.selectCursor(namespace, obj);
+
+		return Flux.fromStream(StreamSupport.stream(cursor.spliterator(), false));
 	}
 
-	public <T> Cursor<T> scanTestOnRowBounds(String namespace, T obj, RowBounds rowBounds) {
+	public <T> Flux<T> scanOnRowBounds(String namespace, T obj, RowBounds rowBounds) {
 		if (Page.class.isAssignableFrom(obj.getClass())) {
 			((Page) obj).setDbName(getDbName());
 		}
-		return session.selectCursor(namespace, obj, rowBounds);
+
+		Cursor<T> cursor = session.selectCursor(namespace, obj, rowBounds);
+
+		return Flux.fromStream(StreamSupport.stream(cursor.spliterator(), false));
 	}
 
 	/**
